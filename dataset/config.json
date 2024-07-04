@@ -1,0 +1,162 @@
+{
+    "sequence_names": [
+        "highcontrastline",
+        "velcro_front",
+        "velcro_side",
+        "highcontrastdot",
+        "handspinner",
+        "spider",
+        "led",
+        "screen",
+        "speaker",
+        "motor",
+        "chain_side",
+        "chain_top"
+    ],
+    "sequence_info": {
+        "highcontrastline": {
+            "raw_filepath": "01_highcontrastline/01_highcontrastline.raw",
+            "raw_encoding": "EVT3.0",
+            "hdf5_filepath": "01_highcontrastline/01_highcontrastline.hdf5",
+            "roi": {
+                "x0": 315,
+                "y0": 20,
+                "x1": 970,
+                "y1": 675
+            },
+            "gt_freq": 20
+        },
+        "velcro_front": {
+            "raw_filepath": "02_velcro_front/02_velcro_front.raw",
+            "raw_encoding": "EVT3.0",
+            "hdf5_filepath": "02_velcro_front/02_velcro_front.hdf5",
+            "roi": {
+                "x0": 310,
+                "y0": 0,
+                "x1": 1023,
+                "y1": 713
+            },
+            "gt_freq": 21.1
+        },
+        "velcro_side": {
+            "raw_filepath": "03_velcro_side/03_velcro_side.raw",
+            "raw_encoding": "EVT3.0",
+            "hdf5_filepath": "03_velcro_side/03_velcro_side.hdf5",
+            "roi": {
+                "x0": 289,
+                "y0": 5,
+                "x1": 980,
+                "y1": 696
+            },
+            "gt_freq": 26.3
+        },
+        "highcontrastdot": {
+            "raw_filepath": "04_highcontrastdot/04_highcontrastdot.raw",
+            "raw_encoding": "EVT2.0",
+            "hdf5_filepath": "04_highcontrastdot/04_highcontrastdot.hdf5",
+            "roi": {
+                "x0": 184,
+                "y0": 70,
+                "x1": 447,
+                "y1": 333
+            },
+            "gt_freq": 19.6
+        },
+        "handspinner": {
+            "raw_filepath": "05_handspinner/05_handspinner.raw",
+            "raw_encoding": "EVT2.0",
+            "hdf5_filepath": "05_handspinner/05_handspinner.hdf5",
+            "roi": {
+                "x0": 127,
+                "y0": 184,
+                "x1": 366,
+                "y1": 423
+            },
+            "gt_freq": 4.7
+        },
+        "spider": {
+            "raw_filepath": "06_spider/06_spider.raw",
+            "raw_encoding": "EVT3.0",
+            "hdf5_filepath": "06_spider/06_spider.hdf5",
+            "roi": {
+                "x0": 870,
+                "y0": 259,
+                "x1": 1091,
+                "y1": 480
+            },
+            "gt_freq": 3.2
+        },
+        "led": {
+            "raw_filepath": "07_led/07_led.raw",
+            "raw_encoding": "EVT3.0",
+            "hdf5_filepath": "07_led/07_led.hdf5",
+            "roi": {
+                "x0": 573,
+                "y0": 132,
+                "x1": 699,
+                "y1": 258
+            },
+            "gt_freq": 2000
+        },
+        "screen": {
+            "raw_filepath": "08_screen/08_screen.raw",
+            "raw_encoding": "EVT3.0",
+            "hdf5_filepath": "08_screen/08_screen.hdf5",
+            "roi": {
+                "x0": 597,
+                "y0": 297,
+                "x1": 651,
+                "y1": 351
+            },
+            "gt_freq": 240
+        },
+        "speaker": {
+            "raw_filepath": "09_speaker/09_speaker.raw",
+            "raw_encoding": "EVT3.0",
+            "hdf5_filepath": "09_speaker/09_speaker.hdf5",
+            "roi": {
+                "x0": 366,
+                "y0": 37,
+                "x1": 997,
+                "y1": 668
+            },
+            "gt_freq": 98
+        },
+        "motor": {
+            "raw_filepath": "10_motor/10_motor.raw",
+            "raw_encoding": "EVT2.0",
+            "hdf5_filepath": "10_motor/10_motor.hdf5",
+            "roi": {
+                "x0": 314,
+                "y0": 33,
+                "x1": 462,
+                "y1": 181
+            },
+            "gt_freq": 40
+        },
+        "chain_side": {
+            "raw_filepath": "11_chain_side/11_chain_side.raw",
+            "raw_encoding": "EVT3.0",
+            "hdf5_filepath": "11_chain_side/11_chain_side.hdf5",
+            "roi": {
+                "x0": 595,
+                "y0": 276,
+                "x1": 799,
+                "y1": 480
+            },
+            "gt_freq": 28.7
+        },
+        "chain_top": {
+            "raw_filepath": "12_chain_top/12_chain_top.raw",
+            "raw_encoding": "EVT3.0",
+            "hdf5_filepath": "12_chain_top/12_chain_top.hdf5",
+            "roi": {
+                "x0": 740,
+                "y0": 240,
+                "x1": 920,
+                "y1": 421
+            },
+            "gt_freq": 23
+        }
+    }
+}
