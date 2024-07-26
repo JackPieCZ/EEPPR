@@ -160,3 +160,9 @@ cython_debug/
 #.idea/
 *.avi
 *.ini
+/dataset/04_highcontrastdot/*.raw
+/dataset/04_highcontrastdot/*.hdf5
+/dataset/05_handspinner/*.raw
+/dataset/05_handspinner/*.hdf5
+/dataset/10_motor/*.raw
+/dataset/10_motor/*.hdf5
