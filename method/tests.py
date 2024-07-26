@@ -1,6 +1,7 @@
+import os
 import unittest
-
 from loader import get_sequence_file_path, SEQ_NAMES
+
 
 class TestLoader(unittest.TestCase):
     def test_get_sequence_file_path(self):
@@ -18,7 +19,6 @@ class TestLoader(unittest.TestCase):
         """
         Test removing a file after it has been downloaded.
         """
-        # Assuming 'highcontrastdot' and 'handspinner' are valid and exist
         files_to_remove = ['highcontrastdot', 'handspinner', 'motor']
         for file_name in files_to_remove:
             file_path = get_sequence_file_path(file_name)

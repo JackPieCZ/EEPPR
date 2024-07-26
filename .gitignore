@@ -166,3 +166,4 @@ cython_debug/
 /dataset/05_handspinner/*.hdf5
 /dataset/10_motor/*.raw
 /dataset/10_motor/*.hdf5
+*.tmp_index
