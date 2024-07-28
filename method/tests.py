@@ -1,6 +1,21 @@
 import os
 import unittest
-from loader import get_sequence_file_path, SEQ_NAMES
+from loader import get_sequence_file_path
+
+SEQ_NAMES = [
+    "highcontrastline",
+    "velcro_front",
+    "velcro_side",
+    "highcontrastdot",
+    "handspinner",
+    "spider",
+    "led",
+    "screen",
+    "speaker",
+    "motor",
+    "chain_side",
+    "chain_top"
+]
 
 
 class TestLoader(unittest.TestCase):

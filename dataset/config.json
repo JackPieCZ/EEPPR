@@ -54,6 +54,7 @@
             "raw_filepath": "04_highcontrastdot/04_highcontrastdot.raw",
             "raw_encoding": "EVT2.0",
             "hdf5_filepath": "04_highcontrastdot/04_highcontrastdot.hdf5",
+            "id": "1PwRXsNgZjrjYcKG6KqXSy07W70TrVRRp",
             "roi": {
                 "x0": 184,
                 "y0": 70,
@@ -66,6 +67,7 @@
             "raw_filepath": "05_handspinner/05_handspinner.raw",
             "raw_encoding": "EVT2.0",
             "hdf5_filepath": "05_handspinner/05_handspinner.hdf5",
+            "id": "1I_hL-MP8J6QGMZvXNUaReoihxfysxx5N",
             "roi": {
                 "x0": 127,
                 "y0": 184,
@@ -126,6 +128,7 @@
             "raw_filepath": "10_motor/10_motor.raw",
             "raw_encoding": "EVT2.0",
             "hdf5_filepath": "10_motor/10_motor.hdf5",
+            "id": "1p0b8hM5HzxgvptC4z6Itw27c9NizOZs7",
             "roi": {
                 "x0": 314,
                 "y0": 33,
