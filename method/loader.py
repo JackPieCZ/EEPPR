@@ -16,7 +16,7 @@ def download_sequence(sequence_name: str, file_path: str, url_id: str) -> None:
         f'https://drive.google.com/uc?id={url_id}', file_path, quiet=False)
 
 
-def get_sequence_file_path(sequence_name: str) -> str:
+def get_sequence_path_roi(sequence_name: str) -> str:
     """
     Get the file path for a given sequence name from EE3P3D dataset.
     """
@@ -32,7 +32,7 @@ def get_sequence_file_path(sequence_name: str) -> str:
 
     # Ensure the provided sequence name is in the list of valid names
     assert sequence_name in seq_names, f"Sequence {sequence_name} not found."\
-        "The sequence name must be one of {seq_names}"
+        f"The sequence name must be one of {seq_names}"
 
     seq_info = config_data['sequence_info'][sequence_name]
     file_path = os.path.join(dataset_dir, seq_info['raw_filepath'])
@@ -56,5 +56,5 @@ def get_sequence_file_path(sequence_name: str) -> str:
 
 if __name__ == '__main__':
     # Example usage -> prints the file path of the given sequence
-    print(get_sequence_file_path('highcontrastline'))
-    print(get_sequence_file_path('highcontrastdot'))
+    print(get_sequence_path_roi('highcontrastline'))
+    print(get_sequence_path_roi('highcontrastdot'))
