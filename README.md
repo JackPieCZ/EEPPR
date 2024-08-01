@@ -11,4 +11,4 @@ Each event-based sequence was rendered as a video in 3 playback speeds: [Youtube
 
 ![Ground-truth frequencies of experiments](./dataset/xx_images/experiments_freqs.png)
 
-Sequences `04`, `05` and `10` originate from the Metavision Dataset. To auto-download these sequences, use the `method/loader.py` script.
+Sequences `04_highcontrastdot`, `05_handspinner` and `10_motor` originate from the Metavision Dataset. To auto-download these sequences, use the `method/loader.py` script.
