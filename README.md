@@ -10,9 +10,3 @@ Data capture demonstration: [Youtube video](https://youtu.be/QlfQtvbaYy8)
 Each event-based sequence was rendered as a video in 3 playback speeds: [Youtube playlist](https://www.youtube.com/playlist?list=PLK466i9CoYqQ2780OXJg7WgtUtWMEqbkS)
 
 ![Ground-truth frequencies of experiments](./dataset/xx_images/experiments_freqs.png)
-
-- [ ] Python script for easy sequence loading
-
-## Method
-
-## Usage
