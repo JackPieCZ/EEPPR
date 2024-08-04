@@ -168,3 +168,4 @@ cython_debug/
 /dataset/10_motor/*.hdf5
 *.tmp_index
 /method/tests.py
+/.vscode
