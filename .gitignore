@@ -169,3 +169,4 @@ cython_debug/
 *.tmp_index
 /method/tests.py
 /.vscode
+/method/ee3p3d_out

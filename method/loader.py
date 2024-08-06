@@ -55,6 +55,6 @@ def get_sequence_path_roi(sequence_name: str) -> str:
 
 
 if __name__ == '__main__':
-    # Example usage -> prints the file path of the given sequence
+    # Example usage -> prints the file path and roi of the given sequence
     print(get_sequence_path_roi('highcontrastline'))
     print(get_sequence_path_roi('highcontrastdot'))
