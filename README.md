@@ -40,23 +40,23 @@ Sequences `04_highcontrastdot`, `05_handspinner` and `10_motor` originate from t
 ### Installation
 
 1. Clone the repository:
-```bash
+```console
 git clone https://github.com/JackPieCZ/EE3P3D.git
 cd EE3P3D
 ```
 
 2. Create a new Anaconda environment:
 - If you have CUDA XX.Y version installed:
-```bash
+```console
 conda env create -f ./setup/environment_cudaXX_Y.yml
 ```
 - If you prefer to only use CPU:
-```bash
+```console
 conda env create -f ./setup/environment_cpu.yml
 ```
 
 3. Activate the environment:
-```bash
+```console
 conda activate ee3p3d
 ```
 
@@ -78,43 +78,43 @@ exit()
 After setting up your environment, you can run the EE3P3D method using the main.py script. Here are some example commands:
 
 1. Basic usage with a file (`--file`/`-f`):
-```python
+```console
 python ./method/main.py --file path/to/your/event_file.raw
 ```
 
 2. For analysing any sequence from the EE3P3D dataset simply enter the sequence name. For example, `led`. For all sequence names, check the `dataset` folder or `dataset/config.json`.
-```python
+```console
 python ./method/main.py -f led
 ```
 
 3. Specifying RoI coordinates (optional, `--roi_coords`/`-rc`) in `X0 Y0 X1 Y1` format. RoI for sequences from the dataset are provided automatically:
-```bash
+```console
 python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300
 ```
 
 4. A simple GUI is presented to the user for verifying, selecting, modifying and replacing the RoI. If `--roi_coords` are provided (or the sequence if from the EE3P3D dataset), the GUI can be skipped by using `--skip_roi_gui`/`-srg` flag:
-```bash
+```console
 python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300 --skip_roi_gui
 ```
 
 5. Using a different aggregation function (`mean`, `median`, `max`, `min` or other NumPy functions) for aggregating measurements from all windows (optional, `--aggreg_fn`/`-afn`). By default, `median` is used.
-```bash
+```console
 python ./method/main.py -f path/to/your/event_file.raw --aggreg_fn mean
 ```
 
 6. Visualize correlation responses and their peaks for each window (optional, `--viz_corr_resp`/`-vcr`):
-```bash
+```console 
 python ./method/main.py -f path/to/your/event_file.raw --aggreg_fn mean
 ```
 
 7. Running on a specific device (optional, `--device`/`-d`, default is `cuda:0`):
-```bash
+```console
 python ./method/main.py -f path/to/your/event_file.raw --device cuda:1
 python ./method/main.py -f path/to/your/event_file.raw --device cpu
 ```
 
 8. For a full list of available options, run:
-```bash
+```console
 python ./method/main.py -h 
 
 usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--aggreg_t AGGREG_T] [--read_t READ_T] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE] [--event_count EVENT_COUNT] [--viz_corr_resp] [--device DEVICE] [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
