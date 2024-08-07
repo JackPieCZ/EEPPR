@@ -1,12 +1,16 @@
-import argparse
+import os
 import json
 import logging
-import os
+import argparse
 import numpy as np
-from matplotlib import pyplot as plt, use
 from ee3p3d import EE3P3D
+from matplotlib import pyplot as plt, use
 from utils import setup_roi, list_to_dict
 from loader import get_sequence_path_roi
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def main(args):
@@ -55,31 +59,34 @@ if __name__ == "__main__":
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description='Analyse event-based recording using EE3P3D method')
+        description='Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in event-based sequence using the EE3P3D method.')
     parser.add_argument('--file', '-f', required=True, type=str,
                         help=f'Filepath to the file to read events from (.raw) or name of a sequence from EE3P3D dataset: {seq_names}')
+    parser.add_argument('--roi_coords', '-rc', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
+                        help='RoI coordinates of the object to track (X0 Y0 X1 Y1)')
     parser.add_argument('--aggreg_t', '-t', type=int, default=100,
                         help='Events aggregation interval in microseconds (default: 100)')
     parser.add_argument('--read_t', '-r', type=int, default=1000000,
                         help='Number of microseconds to read events from the file (default: 1000000)')
+    parser.add_argument('--aggreg_fn', '-afn', type=str, default='median', choices=['mean', 'median', 'max', 'min'],
+                        help='Function used to aggregate measurements from all windows (default: median)')
+    parser.add_argument('--decimals', '-dp', type=int, default=1,
+                        help='Number of decimal places to round the result to (default: 1)')
+    parser.add_argument('--skip_roi_gui', '-srg', action='store_true',
+                        help='Flag to skip the RoI setup GUI if --roi_coords are provided')
     parser.add_argument('--win_size', '-w', type=int, default=45,
                         help='Window size in pixels (default: 45, recommended not to change, see our paper)')
     parser.add_argument('--event_count', '-N', type=int, default=1800,
                         help='Threshold for template event count (default: 1800, recommended not to change, see our paper)')
-    parser.add_argument('--roi_coords', '-c', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
-                        help='RoI coordinates of the object to track (X0 Y0 X1 Y1)')
-    parser.add_argument('--skip_roi_gui', action='store_true',
-                        help='Flag to skip the RoI setup GUI if --roi_coords are provided')
-    parser.add_argument('--device', '-d', type=str, default='cuda:0',
-                        help='Device to run 3D correlation computations on (default: cuda:0)')
-    parser.add_argument('--aggreg_fn', '-afn', type=str, default='median', choices=['mean', 'median', 'max', 'min'],
-                        help='Function used to aggregate measurements from all windows (default: median)')
-    parser.add_argument('--log', '-l', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        help='Logging level (default: INFO)')
-    parser.add_argument('--decimals', '-dp', type=int, default=1,
-                        help='Number of decimal places to round the result to (default: 1)')
     parser.add_argument('--viz_corr_resp', '-vcr', action='store_true',
                         help='Visualize correlation responses for each window')
+    parser.add_argument('--device', '-d', type=str, default='cuda:0',
+                        help='Device to run 3D correlation computations on (default: cuda:0)')
+    parser.add_argument('--log', '-l', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help='Logging level (default: INFO)')
+    parser.add_argument('--output_dir', '-o', type=str,
+                        help='Name of output directory (default: ./ee3p3d_out)', default='./ee3p3d_out')
 
     args = parser.parse_args()
+    os.makedirs(args.output_dir, exist_ok=True)
     print(main(args))
