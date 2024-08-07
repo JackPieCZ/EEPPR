@@ -108,8 +108,8 @@ class EE3P3D:
             template = partitioned_events[:template_depth, :, :, y_win, x_win]
             window = partitioned_events[:, :, :, y_win, x_win]
 
-            corr_out = F.conv3d(window[None][None],
-                                template[None][None]).squeeze()
+            corr_out = F.conv3d(window[None][None].float(),
+                                template[None][None].float()).squeeze()
 
             if torch.topk(corr_out, 2)[0][-1] <= 0:
                 continue
