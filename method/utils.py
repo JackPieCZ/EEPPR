@@ -1,14 +1,12 @@
 import os
 from matplotlib import ticker
 import sparse
-import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button, Slider
 from metavision_core.event_io import EventsIterator, RawReader
 from metavision_sdk_core import BaseFrameGenerationAlgorithm, RoiFilterAlgorithm
-
-logger = logging.getLogger(__name__)
+from logger import logger
 
 
 def generate_event_frame(events: np.ndarray, height: int, width: int) -> np.ndarray:

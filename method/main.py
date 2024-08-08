@@ -1,16 +1,12 @@
 import os
 import json
-import logging
 import argparse
 import numpy as np
 from ee3p3d import EE3P3D
 from matplotlib import pyplot as plt, use
 from utils import setup_roi, list_to_dict
 from loader import get_sequence_path_roi
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+from logger import setup_logger, logger
 
 
 def main(args):
@@ -20,7 +16,7 @@ def main(args):
     Args:
         args (argparse.Namespace): Command-line arguments.
     """
-    logger.debug('Test1')
+    setup_logger(args.output_dir, args.log)
     logger.info(f"EE3P3D method started with sequence '{args.file}'")
 
     # Check if file is from EE3P3D dataset
