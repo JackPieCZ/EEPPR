@@ -29,6 +29,11 @@ Sequences `04_highcontrastdot`, `05_handspinner` and `10_motor` originate from t
 
 ### Installation
 
+Compatibility: 
+- Windows 10/11, Linux Ubuntu 20.04 and Ubuntu 22.04
+- Python 3.9
+- CUDA 11.7, 12.1, 12.4 or CPU only
+
 #### Prerequisites
 1. **Anaconda**: For managing the Python environment.
    - Download and install Miniconda from the [official Anaconda website](https://docs.anaconda.com/miniconda/miniconda-install/).
@@ -37,8 +42,23 @@ Sequences `04_highcontrastdot`, `05_handspinner` and `10_motor` originate from t
    - Download and install the appropriate version from the [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive).
 
 4. **Metavision SDK**: The Metavision SDK is required for I/O operations with event-based sequences (.raw or .hdf5). File formats from other event camera manufacturers are currently not supported. However, if you implemented support for one, feel free to open a pull request.
-   - Follow installation instructions for [Windows](https://docs.prophesee.ai/4.5.2/installation/windows.html#chapter-installation-windows) or [Linux](https://docs.prophesee.ai/4.5.2/installation/linux.html#chapter-installation-linux). Check out their [Operating System Support](https://docs.prophesee.ai/4.5.2/installation/index.html#operating-system-support)
+- For Windows
+   - Open installation instructions for [Windows](https://docs.prophesee.ai/4.5.2/installation/windows.html#chapter-installation-windows)
+   - Verify your system is compatible by checking the [Required Configuration section](https://docs.prophesee.ai/4.5.2/installation/windows.html#required-configuration)
+   - Whether you are installing the SDK for the first time or are currently using a previous version, you must download our Windows installer which is hosted in an installer repository. The URL of this repository can be retrieved this way:
+        - If you are a Prophesee customer, retrieve the link in the [Knowledge Center Download section](https://support.prophesee.ai/portal/en/kb/prophesee-1/metavision-sdk/download-center). ([request an account](https://www.prophesee.ai/kc-access-request/) if you don’t have one yet).
+        - Otherwise, you must [sign-up for the SDK](https://www.prophesee.ai/metavision-intelligence-sdk-download) to get the link.
 
+   - Once you have access to our installer repository, among the list of SDK installers (Metavision_SDK_xyz_Setup.exe), download the one with highest version number and install it.
+- For Linux
+   - Open installation instructions for [Linux](https://docs.prophesee.ai/4.5.2/installation/linux.html#chapter-installation-linux)
+   - Verify your system is compatible by checking the [Required Configuration section](https://docs.prophesee.ai/4.5.2/installation/linux.html#required-configuration)
+   - Whether you are installing the SDK for the first time or are currently using a previous version, to install Metavision SDK on Linux, you need our APT repository configuration file `metavision.list`.
+        - If you are a Prophesee customer, retrieve the link in the [Knowledge Center Download section](https://support.prophesee.ai/portal/en/kb/prophesee-1/metavision-sdk/download-center). ([request an account](https://www.prophesee.ai/kc-access-request/) if you don’t have one yet).
+        - Otherwise, you must [sign-up for the SDK](https://www.prophesee.ai/metavision-intelligence-sdk-download) to get the link.
+
+   - Continue with [Installing Dependencies](https://docs.prophesee.ai/4.5.2/installation/linux.html#installing-dependencies) and [Installation](https://docs.prophesee.ai/4.5.2/installation/linux.html#installation) steps
+   
 #### Setup
 1. Clone the repository:
 ```console
@@ -47,7 +67,17 @@ cd EE3P3D
 ```
 
 2. Create a new Anaconda environment:
-- If you have CUDA XX.Y version installed:
+- Open the Anaconda terminal 
+   - If you used default installation path in Windows you can use the following command
+   ```bash
+   %windir%\System32\cmd.exe "/K" C:\ProgramData\miniconda3\Scripts\activate.bat C:\ProgramData\miniconda3
+   ```
+   - No extra step is required in Linux
+- Verify conda is instaled. No errors should appear.
+```console
+conda
+```
+- If you have CUDA XX.Y version installed run the following command:
 ```console
 conda env create -f ./setup/environment_cudaXX_Y.yml
 ```
@@ -61,9 +91,9 @@ conda env create -f ./setup/environment_cpu.yml
 conda activate ee3p3d
 ```
 
-4. Verifying the Installation:
+4. Verify the Installation:
 
-To verify that the environment with CUDA is set up correctly, you can run a quick CUDA check:
+To verify that the environment with CUDA is set up correctly, you can run a quick check. No errors should appear.
 
 ```python
 python
@@ -72,6 +102,8 @@ print(f"CUDA is available: {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
 print(f"PyTorch version: {torch.__version__}")
 exit()
+
+python .\method\test_imports.py
 ```
 
 ### Usage
@@ -117,7 +149,8 @@ python ./method/main.py -f path/to/your/event_file.raw --device cpu
 8. For a full list of available options, run:
 ```console
 python ./method/main.py -h 
-
+```
+```
 usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--aggreg_t AGGREG_T] [--read_t READ_T] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE] [--event_count EVENT_COUNT] [--viz_corr_resp] [--device DEVICE] [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
                [--output_dir OUTPUT_DIR]
 
@@ -151,8 +184,8 @@ optional arguments:
 
 If you encounter any issues during installation or running the method, please check the following:
 
-1. Ensure your CUDA installation matches the version specified in the Anaconda environment.
-2. Make sure all prerequisites are correctly installed.
+1. Ensure your CUDA installation matches the version specified by the Anaconda environment version.
+2. Make sure all prerequisites are correctly installed by running the `test_imports.py` script.
 3. Verify that you're using the correct Python version (3.9) within the Anaconda environment.
 
 If problems persist, please open an issue with details about your setup and the error you're encountering.
