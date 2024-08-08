@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import json
 import argparse
@@ -16,7 +17,7 @@ def main(args):
     Args:
         args (argparse.Namespace): Command-line arguments.
     """
-    setup_logger(args.output_dir, args.log)
+    setup_logger(run_dir, args.log)
     logger.info(f"EE3P3D method started with sequence '{args.file}'")
 
     # Check if file is from EE3P3D dataset
@@ -33,7 +34,7 @@ def main(args):
     logger.info(f"Selected RoI: {args.roi_coords}")
 
     # Initialize and run EE3P3D
-    ee3p3d = EE3P3D(args)
+    ee3p3d = EE3P3D(args, run_dir)
     result = ee3p3d.run()
 
     logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
@@ -84,5 +85,7 @@ if __name__ == "__main__":
                         help='Name of output directory (default: ./ee3p3d_out)', default='./ee3p3d_out')
 
     args = parser.parse_args()
-    os.makedirs(args.output_dir, exist_ok=True)
+    run_dir = os.path.join(
+        args.output_dir, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}',)
+    os.makedirs(run_dir, exist_ok=True)
     print(main(args))
