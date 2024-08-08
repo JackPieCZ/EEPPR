@@ -33,8 +33,6 @@ dependencies:
   - fonttools=4.51.0=py39h2bbff1b_0
   - freetype=2.12.1=ha860e81_0
   - gmpy2=2.1.2=py39h7f96b67_0
-  - h5py=3.11.0=py39hed405ee_0
-  - hdf5=1.12.1=h51c971a_3
   - icc_rt=2022.1.0=h6049295_2
   - icu=73.1=h6c2663c_0
   - idna=3.7=py39haa95532_0
@@ -140,10 +138,10 @@ dependencies:
       - beautifulsoup4==4.12.3
       - einops==0.8.0
       - gdown==5.2.0
+      - h5py==3.7.0
       - llvmlite==0.43.0
       - numba==0.60.0
       - soupsieve==2.5
       - sparse==0.15.4
       - torchaudio==2.4.0
       - torchvision==0.19.0
-prefix: C:\ProgramData\miniconda3\envs\evcam124
