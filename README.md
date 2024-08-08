@@ -43,7 +43,7 @@ Tested on, but same versions (probably) not required:
 
 1. **Anaconda**: For managing the Python environment.
    - Download and install Miniconda for **Python 3.9** from the [official Anaconda website](https://docs.anaconda.com/miniconda/miniconda-other-installer-links/).
-   - When installing consider adding Miniconda3 to PATH. Otherwise, you will need to run specific Anaconda terminal (instructions on activating it bellow).
+   - When installing, consider adding Miniconda3 to PATH. Otherwise, you will need to run a specific Anaconda terminal (instructions on activating it below).
 
 2. **CUDA Toolkit**: This method supports GPU acceleration for 3D correlation computing using CUDA PyTorch. The method was tested and the repo contains environment setups for CUDA versions `11.7`, `12.1` and `12.4`. If none of these versions are compatible with your system, a `cpu only` environment setup is available as well and you can skip this step.
    - Download and install the appropriate version from the [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive).
@@ -53,7 +53,7 @@ Tested on, but same versions (probably) not required:
    - For Windows
       - Open installation instructions for [Windows](https://docs.prophesee.ai/4.5.2/installation/windows.html#chapter-installation-windows)
       - Verify your system is compatible by checking the [Required Configuration section](https://docs.prophesee.ai/4.5.2/installation/windows.html#required-configuration)
-      - Whether you are installing the SDK for the first time or are currently using a previous version, you must download our Windows installer which is hosted in an installer repository. The URL of this repository can be retrieved this way:
+      - Whether you are installing the SDK for the first time or are currently using a previous version, you must download our Windows installer, which is hosted in an installer repository. The URL of this repository can be retrieved this way:
          - If you are a Prophesee customer, retrieve the link in the [Knowledge Center Download section](https://support.prophesee.ai/portal/en/kb/prophesee-1/metavision-sdk/download-center). ([request an account](https://www.prophesee.ai/kc-access-request/) if you don’t have one yet).
          - Otherwise, you must [sign-up for the SDK](https://www.prophesee.ai/metavision-intelligence-sdk-download) to get the link.
 
@@ -68,7 +68,7 @@ Tested on, but same versions (probably) not required:
       - Continue with [Installing Dependencies](https://docs.prophesee.ai/4.5.2/installation/linux.html#installing-dependencies) and [Installation](https://docs.prophesee.ai/4.5.2/installation/linux.html#installation) steps
    
 ### Setup
-1. Clone the repository at path that does not contain any special characters (e.g. ě, š, č, ř, ž, ý, á, í, é). Otherwise, the Metavision SDK Driver raises an exception (Error 103001):
+1. Clone the repository at a path that does not contain any special characters (e.g. ě, š, č, ř, ž, ý, á, í, é). Otherwise, the Metavision SDK Driver raises an exception (Error 103001):
 ```console
 git clone https://github.com/JackPieCZ/EE3P3D.git
 cd EE3P3D
@@ -84,12 +84,12 @@ cd EE3P3D
       ```bash
       %windir%\System32\cmd.exe "/K" C:\Users\<user_name>\Scripts\activate.bat C:\Users\<user_name>\miniconda3
       ```
-   - Verify conda is instaled. A list of commands should appear.
+   - Verify conda is installed. A list of commands should appear.
    ```console
    conda
    ```
-   - Move to EE3P3D directory using `cd` if you are not already there
-   - If you have CUDA XX.Y version installed (11.7, 12.1, 12.4) run the following command:
+   - Move to the EE3P3D directory using `cd` if you are not already there
+   - If you have the CUDA XX.Y version installed (11.7, 12.1, 12.4), run the following command:
    ```console
    conda env create -f ./setup/environment_cudaXX_Y.yml
    ```
@@ -105,7 +105,7 @@ conda activate ee3p3d
 
 4. Verify the Installation:
 
-To verify that the environment with CUDA is set up correctly, you can run a quick check. No errors should appear.
+You can run a quick check to verify that the environment with CUDA is set up correctly. No errors should appear.
 
 ```python
 python
@@ -200,7 +200,7 @@ optional arguments:
 
 If you encounter any issues during installation or running the method, please check the following:
 
-- `Metavision SDK Driver error 103001`: You are trying to open a file using a filepath that contains some special characters.
+- `Metavision SDK Driver error 103001`: You are trying to open a file using a file path that contains some special characters.
 - `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver, otherwise use the `--device cpu` flag when running the method.
 - Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script.
 - Verify that you're using the correct Python version (3.9) within the Anaconda environment.
