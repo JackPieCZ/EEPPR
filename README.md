@@ -27,21 +27,28 @@ Sequences `04_highcontrastdot`, `05_handspinner` and `10_motor` originate from t
 4. a frequency is calculated from the median of time deltas measured between correlation peaks for each window,
 5. the output frequency is computed as a median of measurements from all windows.
 
-### Installation
+## Installation
 
 Compatibility: 
 - Windows 10/11, Linux Ubuntu 20.04 and Ubuntu 22.04
 - Python 3.9
 - CUDA 11.7, 12.1, 12.4 or CPU only
+Tested on, but same versions (probably) not required:
+- Miniconda3-py39-24.5.0
+- Metavision SDK 4.4.0
 
-#### Prerequisites
+### Prerequisites
+0. [**Git**](https://git-scm.com/downloads) or [**GitHub Desktop**](https://github.com/apps/desktop) app
+
 1. **Anaconda**: For managing the Python environment.
-   - Download and install Miniconda from the [official Anaconda website](https://docs.anaconda.com/miniconda/miniconda-install/).
+   - Download and install Miniconda for **Python 3.9** from the [official Anaconda website](https://docs.anaconda.com/miniconda/miniconda-other-installer-links/).
+   - When installing consider adding Miniconda3 to PATH. Otherwise, you will need to run specific Anaconda terminal (instructions on activating it bellow).
 
-3. **CUDA Toolkit**: This method supports GPU acceleration for 3D correlation computing using CUDA PyTorch. The method was tested and the repo contains environment setups for CUDA versions `11.7`, `12.1` and `12.4`. If none of these versions are compatible with your system, a `cpu only` environment setup is available as well.
+2. **CUDA Toolkit**: This method supports GPU acceleration for 3D correlation computing using CUDA PyTorch. The method was tested and the repo contains environment setups for CUDA versions `11.7`, `12.1` and `12.4`. If none of these versions are compatible with your system, a `cpu only` environment setup is available as well and you can skip this step.
    - Download and install the appropriate version from the [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive).
+   - Feel free to use the Expert installation mode and uncheck installing any non CUDA related packages
 
-4. **Metavision SDK**: The Metavision SDK is required for I/O operations with event-based sequences (.raw or .hdf5). File formats from other event camera manufacturers are currently not supported. However, if you implemented support for one, feel free to open a pull request.
+3. **Metavision SDK**: The Metavision SDK is required for I/O operations with event-based sequences (.raw or .hdf5). File formats from other event camera manufacturers are currently not supported. However, if you implemented support for one, feel free to open a pull request.
 - For Windows
    - Open installation instructions for [Windows](https://docs.prophesee.ai/4.5.2/installation/windows.html#chapter-installation-windows)
    - Verify your system is compatible by checking the [Required Configuration section](https://docs.prophesee.ai/4.5.2/installation/windows.html#required-configuration)
@@ -49,7 +56,7 @@ Compatibility:
         - If you are a Prophesee customer, retrieve the link in the [Knowledge Center Download section](https://support.prophesee.ai/portal/en/kb/prophesee-1/metavision-sdk/download-center). ([request an account](https://www.prophesee.ai/kc-access-request/) if you don’t have one yet).
         - Otherwise, you must [sign-up for the SDK](https://www.prophesee.ai/metavision-intelligence-sdk-download) to get the link.
 
-   - Once you have access to our installer repository, among the list of SDK installers (Metavision_SDK_xyz_Setup.exe), download the one with highest version number and install it.
+   - Once you have access to our installer repository, among the list of SDK installers, download the `Metavision_SDK_440_Setup.exe` and install it using default settings.
 - For Linux
    - Open installation instructions for [Linux](https://docs.prophesee.ai/4.5.2/installation/linux.html#chapter-installation-linux)
    - Verify your system is compatible by checking the [Required Configuration section](https://docs.prophesee.ai/4.5.2/installation/linux.html#required-configuration)
@@ -59,7 +66,7 @@ Compatibility:
 
    - Continue with [Installing Dependencies](https://docs.prophesee.ai/4.5.2/installation/linux.html#installing-dependencies) and [Installation](https://docs.prophesee.ai/4.5.2/installation/linux.html#installation) steps
    
-#### Setup
+### Setup
 1. Clone the repository:
 ```console
 git clone https://github.com/JackPieCZ/EE3P3D.git
@@ -68,16 +75,20 @@ cd EE3P3D
 
 2. Create a new Anaconda environment:
 - Open the Anaconda terminal 
-   - If you used default installation path in Windows you can use the following command
+   - If you used **default path** when installing in for **all users** in Windows you can use the following command
    ```bash
    %windir%\System32\cmd.exe "/K" C:\ProgramData\miniconda3\Scripts\activate.bat C:\ProgramData\miniconda3
    ```
-   - No extra step is required in Linux
-- Verify conda is instaled. No errors should appear.
+   - If you used **default path** when installing in for **current user** with `<user_name>` in Windows you can use the following command
+   ```bash
+   %windir%\System32\cmd.exe "/K" C:\Users\<user_name>\Scripts\activate.bat C:\Users\<user_name>\miniconda3
+   ```
+- Verify conda is instaled. A list of commands should appear.
 ```console
 conda
 ```
-- If you have CUDA XX.Y version installed run the following command:
+- Move to EE3P3D directory using `cd` if you are not already there
+- If you have CUDA XX.Y version installed (11.7, 12.1, 12.4) run the following command:
 ```console
 conda env create -f ./setup/environment_cudaXX_Y.yml
 ```
@@ -115,7 +126,7 @@ After setting up your environment, you can run the EE3P3D method using the main.
 python ./method/main.py --file path/to/your/event_file.raw
 ```
 
-2. For analysing any sequence from the EE3P3D dataset simply enter the sequence name. For example, `led`. For all sequence names, check the `dataset` folder or `dataset/config.json`.
+2. For analysing any sequence from the EE3P3D dataset simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, ect. For all sequence names, check the `dataset` folder or `dataset/config.json`.
 ```console
 python ./method/main.py -f led
 ```
@@ -185,7 +196,7 @@ optional arguments:
 If you encounter any issues during installation or running the method, please check the following:
 
 1. Ensure your CUDA installation matches the version specified by the Anaconda environment version.
-2. Make sure all prerequisites are correctly installed by running the `test_imports.py` script.
+2. Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script.
 3. Verify that you're using the correct Python version (3.9) within the Anaconda environment.
 
 If problems persist, please open an issue with details about your setup and the error you're encountering.
