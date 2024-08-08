@@ -6,10 +6,11 @@ logger = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 
-def setup_logger(log_file, level):
+def setup_logger(log_folder, level):
     # Create the file handler for logging to a file
     log_filename = os.path.join(
-        log_file, f'log_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log')
+        log_folder, 
+        f'log_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log')
     file_handler = logging.FileHandler(log_filename)
     file_handler.setFormatter(formatter)
 

@@ -1,5 +1,4 @@
 import os
-from matplotlib import ticker
 import sparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -315,45 +314,3 @@ def find_template_depth(sparse_win_arr: sparse.COO, template_event_count: int, r
             # If the event count is greater than or equal to the desired count, move the right pointer to mid - 1
             right = mid - 1
     return left
-
-
-def viz_corr_resps(peaks: np.ndarray, properties: dict, conv_out: np.ndarray, aggreg_t: int, lower_bound: float) -> None:
-    """
-    Visualize the correlation responses.
-
-    Args:
-        peaks (np.ndarray): Array of peak indices.
-        properties (dict): Dictionary of peak properties.
-        conv_out (np.ndarray): Array of correlation responses.
-        aggreg_t (int): Aggregation time interval.
-        lower_bound (float): Lower bound of peaks.
-
-    Returns:
-        None
-    """
-    fig, ax = plt.subplots()
-
-    # Normalize the correlation response
-    lower_bound /= np.max(conv_out)
-    properties['peak_heights'] /= np.max(conv_out)
-    conv_out /= np.max(conv_out)
-
-    fontsize = 12
-    ax.plot(conv_out, label='Correlation responses')
-    plt.ylabel("Normalized correlation response", fontsize=fontsize)
-    plt.xlabel("Time in milliseconds", fontsize=fontsize)
-    plt.xticks(fontsize=fontsize)
-    plt.yticks(fontsize=fontsize)
-    plt.xlim(0, len(conv_out))
-
-    # Format x-axis labels to display time in milliseconds
-    ax.xaxis.set_major_formatter(
-        ticker.FuncFormatter(lambda x, _: '{:.0f}'.format(x / (1000 / aggreg_t))))
-    ax.plot(peaks, properties['peak_heights'], "x",
-            label='Peaks', markersize=fontsize)
-    plt.plot(np.full_like(conv_out, lower_bound), "--",
-             color="gray", label='Lower bound of peaks')
-    plt.legend(loc='lower right', fontsize=fontsize)
-    fig.tight_layout()
-    plt.grid()
-    plt.show()
