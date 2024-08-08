@@ -27,18 +27,19 @@ Sequences `04_highcontrastdot`, `05_handspinner` and `10_motor` originate from t
 4. a frequency is calculated from the median of time deltas measured between correlation peaks for each window,
 5. the output frequency is computed as a median of measurements from all windows.
 
-### Prerequisites
+### Installation
+
+#### Prerequisites
 1. **Anaconda**: For managing the Python environment.
    - Download and install Miniconda from the [official Anaconda website](https://docs.anaconda.com/miniconda/miniconda-install/).
 
 3. **CUDA Toolkit**: This method supports GPU acceleration for 3D correlation computing using CUDA PyTorch. The method was tested and the repo contains environment setups for CUDA versions `11.7`, `12.1` and `12.4`. If none of these versions are compatible with your system, a `cpu only` environment setup is available as well.
    - Download and install the appropriate version from the [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive).
 
-4. ** Metavision SDK **: The Metavision SDK is required for I/O operations with event-based sequences (.raw or .hdf5). File formats from other event camera manufacturers are currently not supported. However, if you implemented support for one, feel free to open a pull request.
+4. **Metavision SDK**: The Metavision SDK is required for I/O operations with event-based sequences (.raw or .hdf5). File formats from other event camera manufacturers are currently not supported. However, if you implemented support for one, feel free to open a pull request.
    - Follow installation instructions for [Windows](https://docs.prophesee.ai/4.5.2/installation/windows.html#chapter-installation-windows) or [Linux](https://docs.prophesee.ai/4.5.2/installation/linux.html#chapter-installation-linux). Check out their [Operating System Support](https://docs.prophesee.ai/4.5.2/installation/index.html#operating-system-support)
 
-### Installation
-
+#### Setup
 1. Clone the repository:
 ```console
 git clone https://github.com/JackPieCZ/EE3P3D.git
