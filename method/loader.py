@@ -36,6 +36,9 @@ def get_sequence_path_roi(sequence_name: str) -> str:
 
     seq_info = config_data['sequence_info'][sequence_name]
     file_path = os.path.join(dataset_dir, seq_info['raw_filepath'])
+    seq_dir = os.path.dirname(file_path)
+    [os.remove(os.path.join(seq_dir, file))
+     for file in os.listdir(seq_dir) if file.endswith(".tmp_index")]
 
     # Check if the file exists, if not, attempt to download it from Metavision dataset
     if not os.path.exists(file_path):
@@ -50,7 +53,6 @@ def get_sequence_path_roi(sequence_name: str) -> str:
     roi_coords = seq_info['roi']
     assert roi_coords, f"No ROI coordinates found for sequence {sequence_name}. "\
         "Please open an issue on the repository."
-
     return file_path, roi_coords
 
 
