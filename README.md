@@ -68,7 +68,7 @@ Tested on, but same versions (probably) not required:
       - Continue with [Installing Dependencies](https://docs.prophesee.ai/4.5.2/installation/linux.html#installing-dependencies) and [Installation](https://docs.prophesee.ai/4.5.2/installation/linux.html#installation) steps
    
 ### Setup
-1. Clone the repository:
+1. Clone the repository at path that does not contain any special characters (e.g. ě, š, č, ř, ž, ý, á, í, é). Otherwise, the Metavision SDK Driver raises an exception (Error 103001):
 ```console
 git clone https://github.com/JackPieCZ/EE3P3D.git
 cd EE3P3D
@@ -110,12 +110,16 @@ To verify that the environment with CUDA is set up correctly, you can run a quic
 ```python
 python
 import torch
-print(f"CUDA is available: {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
 print(f"PyTorch version: {torch.__version__}")
+print(f"CUDA is available: {torch.cuda.is_available()}")
+if not torch.cuda.is_available():
+   print("CUDA is not available.")
+   print("When running the EE3P3D method, please use '--device cpu' flag.")
 exit()
 
-python .\method\test_imports.py
+python ./method/test_imports.py
+
 ```
 
 ### Usage
@@ -196,9 +200,12 @@ optional arguments:
 
 If you encounter any issues during installation or running the method, please check the following:
 
-1. Ensure your CUDA installation matches the version specified by the Anaconda environment version.
-2. Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script.
-3. Verify that you're using the correct Python version (3.9) within the Anaconda environment.
+- Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script.
+- Verify that you're using the correct Python version (3.9) within the Anaconda environment.
+- Ensure your CUDA installation matches the version specified by the Anaconda environment version.
+
+- `Metavision SDK Driver error 103001`: You are trying to open a file using a filepath that contains some special characters.
+- `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver, otherwise use the `--device cpu` flag when running the method.
 
 If problems persist, please open an issue with details about your setup and the error you're encountering.
 
