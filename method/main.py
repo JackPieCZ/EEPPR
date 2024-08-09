@@ -18,6 +18,11 @@ def main(args):
         args (argparse.Namespace): Command-line arguments.
     """
     setup_logger(run_dir, args.log)
+    assert args.aggreg_t > 0, "Aggregation interval must be greater than 0, reccomended 100"
+    assert args.read_t > 0, "Read time must be greater than 0, reccomended 1000000"
+    assert args.win_size > 0, "Window size must be greater than 0, reccomended 45"
+    assert args.event_count > 0, "Event count threshold must be greater than 0, reccomended 1800"
+    
     logger.info(f"EE3P3D method started with sequence '{args.file}'")
 
     # Check if file is from EE3P3D dataset
@@ -25,6 +30,7 @@ def main(args):
         args.file, args.roi_coords = get_sequence_path_roi(args.file)
     else:
         assert os.path.exists(args.file), f"File {args.file} not found"
+        assert args.file.lower().endswith('.raw'), "File must be in .raw format"
 
     if isinstance(args.roi_coords, list):
         args.roi_coords = list_to_dict(args.roi_coords)
