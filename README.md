@@ -153,7 +153,7 @@ python ./method/main.py -f path/to/your/event_file.raw --aggreg_fn mean
 
 6. Visualize correlation responses and their peaks for each window (optional, `--viz_corr_resp`/`-vcr`):
 ```console 
-python ./method/main.py -f path/to/your/event_file.raw --aggreg_fn mean
+python ./method/main.py -f handspinner -vcr
 ```
 
 7. Running on a specific device (optional, `--device`/`-d`, default is `cuda:0`):
@@ -200,7 +200,7 @@ optional arguments:
 
 If you encounter any issues during installation or running the method, please check the following:
 
-- `Metavision SDK Driver error 103001`: You are trying to open a file using a file path that contains some special characters.
+- `Metavision SDK Driver error 103001`: You are trying to open a file using a filepath that contains some special characters. [Solution here](https://docs.prophesee.ai/stable/faq.html#why-do-i-get-errors-when-trying-to-read-recorded-files-raw-or-hdf5-with-studio-or-the-api-on-windows)
 - `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver, otherwise use the `--device cpu` flag when running the method.
 - Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script.
 - Verify that you're using the correct Python version (3.9) within the Anaconda environment.
