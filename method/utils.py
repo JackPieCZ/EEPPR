@@ -148,9 +148,9 @@ def setup_roi(video_path: str, roi: dict, win_size: int) -> dict:
     ax_addroi = fig.add_axes([0.46, 0.05, 0.1, 0.075])
     ax_save = fig.add_axes([0.57, 0.05, 0.1, 0.075])
 
-    save_button = Button(ax_save, 'Confirm RoI')
-    reset_button = Button(ax_reset, 'Reset')
-    addroi_button = Button(ax_addroi, 'Replace RoI')
+    save_button = Button(ax_save, 'Confirm & Exit')
+    reset_button = Button(ax_reset, 'Reset to default')
+    addroi_button = Button(ax_addroi, 'Set RoI')
 
     # Setup initial square
     pending_roi = plt.Rectangle((x.val, y.val), size.val, size.val,
@@ -164,10 +164,10 @@ def setup_roi(video_path: str, roi: dict, win_size: int) -> dict:
         ax[0].add_patch(current_roi)
         selected_roi.append(roi)
         draw_windows(roi['x0'], roi['y0'], roi['x1'] - roi['x0'], win_size)
-        update_roi_info('Confirm or change the RoI.')
+        update_roi_info('Confirm the RoI or use sliders to modify it, then press Set RoI.\n')
     else:
         draw_windows(x.val, y.val, size.val, win_size)
-        update_roi_info('Select the RoI.')
+        update_roi_info('Use sliders to select a RoI, then press Set RoI.')
         add_roi(None)
 
     fig.canvas.draw_idle()
