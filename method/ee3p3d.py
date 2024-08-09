@@ -236,7 +236,7 @@ class EE3P3D:
         Returns:
             None
         """
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(16, 9))
 
         # Normalize the correlation response
         lower_bound /= np.max(conv_out)
@@ -250,10 +250,6 @@ class EE3P3D:
         plt.xticks(fontsize=fontsize)
         plt.yticks(fontsize=fontsize)
         plt.xlim(0, len(conv_out))
-        if properties['peak_heights'].size > 100:
-            print(properties['peak_heights'][100])
-        plt.ylim(np.min(properties['peak_heights']) - 0.1,
-                 np.max(properties['peak_heights']) + 0.1)
 
         # Format x-axis labels to display time in milliseconds
         ax.xaxis.set_major_formatter(
@@ -262,7 +258,7 @@ class EE3P3D:
                 label='Peaks', markersize=fontsize)
         plt.plot(np.full_like(conv_out, lower_bound), "--",
                  color="gray", label='Lower bound of peaks')
-        plt.legend(loc='lower right', fontsize=fontsize)
+        plt.legend(fontsize=fontsize)
         fig.tight_layout()
         plt.grid()
 
