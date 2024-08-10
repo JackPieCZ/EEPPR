@@ -16,13 +16,14 @@ from logger import logger
 
 
 class EE3P3D:
-    def __init__(self, args: argparse.Namespace, run_dir: str):
+    def __init__(self, args: argparse.Namespace, run_dir: str, raw_reader):
         """
         Initialize the EE3P3D method.
 
         Args:
             args (argparse.Namespace): Command-line arguments.
         """
+        self.reader = raw_reader
         self.input_file_path = args.file
         self.output_folder_path = args.output_dir
         self.aggreg_t = args.aggreg_t
@@ -36,7 +37,8 @@ class EE3P3D:
         self.device = torch.device(args.device)
         self.run_dir = run_dir
         self.log_level = args.log
-        self.win_coords = None
+        self.win_coords = -1, -1
+        self.verbose = args.verbose
 
     def run(self):
         """
@@ -47,8 +49,11 @@ class EE3P3D:
         """
         # Load events from input file
         sparse_ev_arr = load_events(
-            self.input_file_path, self.read_t, self.roi_coords)
-
+            self.input_file_path, self.reader, self.read_t, self.roi_coords)
+        
+        # Delete the reader to free up memory
+        del self.reader
+        
         # Quantize events and convert to torch tensor
         quantized_events = torch.from_numpy(quantize_events(self.input_file_path, self.read_t, self.roi_coords, self.aggreg_t)[None])\
             .to(self.device)
@@ -64,20 +69,25 @@ class EE3P3D:
                            self.win_size), stride=self.win_size)
         partitioned_events = einops.rearrange(unfold_fn(quantized_events), '1 (b w h) (y x) -> b w h y x',
                                               x=x_windows_num, y=y_windows_num, w=self.win_size, h=self.win_size)
-
+        # Delete the original events tensor to free up memory
+        del quantized_events
+        
         # Perform 3D correlation on the event data
-        estim_rps_per_win = self.correlate_3d(
+        estim_freq_arr = self.correlate_3d(
             sparse_ev_arr, x_windows_num, y_windows_num, partitioned_events)
+        
+        # Delete the sparse array and partitioned events tensor to free up memory
+        del sparse_ev_arr, partitioned_events
 
         # If no estimations are found, double the aggreg_t value and run again
-        if estim_rps_per_win is None:
+        if estim_freq_arr is None:
             self.aggreg_t *= 2
             return self.run()
 
         # Apply the aggregation function to aggregate the estimations from all windows
-        aggreg_fn = getattr(np, self.aggreg_fn)
+        aggreg_fn = getattr(np, self.aggreg_fn.lower())
         result = np.round(
-            aggreg_fn(estim_rps_per_win[estim_rps_per_win > 0]), self.precision)
+            aggreg_fn(estim_freq_arr[estim_freq_arr > 0]), self.precision)
 
         return result
 
@@ -95,13 +105,15 @@ class EE3P3D:
             np.ndarray: Array of estimated rotations per second for each window.
         """
         # Initialize the result array with -1.0
-        win_rps_arr = np.full((x_windows_num, y_windows_num), -1.0)
+        freq_arr = np.full((x_windows_num, y_windows_num), -1.0)
 
         # Iterate over each window in the grid
-        for x_win, y_win in tqdm(np.ndindex(x_windows_num, y_windows_num), desc='Analysing events within windows', total=x_windows_num * y_windows_num):
+        for x_win, y_win in (pbar := tqdm(np.ndindex(x_windows_num, y_windows_num), total=x_windows_num * y_windows_num)):
             self.win_coords = (x_win, y_win)
             logger.debug(
-                f'Processing window ({x_win}, {y_win}), {self.win_size}x{self.win_size} px, total windows: {x_windows_num * y_windows_num}')
+                f'Analysing events within window x={x_win}, y={y_win}, total windows: {x_windows_num * y_windows_num}')
+            pbar.set_description(
+                f'Analysing events within window x={x_win}, y={y_win}')
 
             # Calculate the start and end coordinates for the current window
             x_start = x_win * self.win_size + self.roi_coords['x0']
@@ -115,7 +127,9 @@ class EE3P3D:
             # Skip if the number of non-zero elements is less than the template event count
             if sparse_win_arr.nnz < self.template_event_count:
                 logger.debug(
-                    f'Number of events ({sparse_win_arr.nnz}) in the window is less than the template event count ({self.template_event_count}). Skipping window.')
+                    f'Number of events ({sparse_win_arr.nnz}) in the window is less than the template event count ({self.template_event_count}). Skipping window {self.win_coords}.')
+                if self.verbose:
+                    tqdm.write(f'Number of events ({sparse_win_arr.nnz}) in the window is less than the template event count ({self.template_event_count}). Skipping window {self.win_coords}.')
                 continue
 
             # Find the depth of the template
@@ -127,7 +141,9 @@ class EE3P3D:
             # Skip if the template depth is too sparse
             if template_depth >= (self.read_t // self.aggreg_t) / 8:
                 logger.debug(
-                    'Template events are too sparse. Skipping window.')
+                    f'Template events are too sparse. Skipping window {self.win_coords}.')
+                if self.verbose:
+                    tqdm.write(f'Template events are too sparse. Skipping window {self.win_coords}.')
                 continue
 
             # Extract the template and window tensors
@@ -140,6 +156,10 @@ class EE3P3D:
 
             # Skip if the second highest value in the correlation output is non-positive
             if torch.topk(corr_out, 2)[0][-1] <= 0:
+                logger.debug(
+                    f'No positive correlation responses found. Skipping window  {self.win_coords}.')
+                if self.verbose:
+                    tqdm.write(f'No positive correlation responses found. Skipping window  {self.win_coords}.')
                 continue
 
             # Convert the correlation output to a numpy array
@@ -157,15 +177,24 @@ class EE3P3D:
             # Find periodic peaks in the correlation output
             peaks = self.find_periodic_peaks(corr_out)
             period_timemarks = np.multiply(peaks, self.aggreg_t).flatten()
+            if period_timemarks.size < 2:
+                logger.debug(
+                    f'Less than 2 peaks found. Skipping window  {self.win_coords}.')
+                if self.verbose:
+                    tqdm.write(f'Less than 2 peaks found. Skipping window  {self.win_coords}.')
             periods = np.diff(period_timemarks)
 
             # Skip if no periods are found
             if periods.size == 0:
+                logger.debug(
+                    f'No periods found. Skipping window  {self.win_coords}.')
+                if self.verbose:
+                    tqdm.write(f'No periods found. Skipping window  {self.win_coords}.')
                 continue
 
             # Calculate the median rotations per second for the current window
-            win_rps_arr[y_win, x_win] = np.median(1e6 / periods)
-            logger.debug(f'Estimated frequency: {np.median(1e6 / periods)} Hz')
+            freq_arr[y_win, x_win] = np.median(1e6 / periods)
+            logger.debug(f'Estimated frequency: {freq_arr[y_win, x_win]} Hz')
 
         # Return the array of estimated rotations per second for each window
         return win_rps_arr
@@ -189,7 +218,7 @@ class EE3P3D:
         # Check if the standard deviation of the differences between timemarks of peaks is less than 5
         if np.std(np.diff(peaks)) < 5:
             # If visualization is enabled, visualize the correlation responses
-            if self.viz_corr_resp or self.log_level == 'DEBUG':
+            if self.viz_corr_resp:
                 self.viz_corr_resps(peaks, properties,
                                     corr_out, min_peak_height)
             # Return the found peaks
@@ -217,7 +246,7 @@ class EE3P3D:
             peaks, properties = find_peaks(
                 corr_out, height=opt_min_peak_height, distance=opt_min_peak_dist)
             # If visualization is enabled, visualize the correlation responses
-            if self.viz_corr_resp or self.log_level == 'DEBUG':
+            if self.viz_corr_resp:
                 self.viz_corr_resps(peaks, properties,
                                     corr_out, opt_min_peak_height)
             # Return the found peaks
@@ -243,29 +272,28 @@ class EE3P3D:
         properties['peak_heights'] /= np.max(conv_out)
         conv_out /= np.max(conv_out)
 
-        fontsize = 12
-        ax.plot(conv_out, label='Correlation responses')
-        plt.ylabel("Normalized correlation response", fontsize=fontsize)
-        plt.xlabel("Time in milliseconds", fontsize=fontsize)
-        plt.xticks(fontsize=fontsize)
-        plt.yticks(fontsize=fontsize)
-        plt.xlim(0, len(conv_out))
+        plt.title('Correlation responses for window x={}, y={}'.format(
+            self.win_coords[0], self.win_coords[1]), fontsize=16)
+        plt.ylabel("Normalized correlation response")
+        plt.xlabel("Time in milliseconds")
+        plt.xlim(0, np.max(peaks))
+        plt.ylim(np.min(conv_out)-0.025,
+                 np.partition(conv_out, -2)[-2]+0.025)
 
         # Format x-axis labels to display time in milliseconds
         ax.xaxis.set_major_formatter(
             ticker.FuncFormatter(lambda x, _: '{:.0f}'.format(x / (1000 / self.aggreg_t))))
+        ax.plot(conv_out, label='Correlation responses')
         ax.plot(peaks, properties['peak_heights'], "x",
-                label='Peaks', markersize=fontsize)
+                label='Peaks')
         plt.plot(np.full_like(conv_out, lower_bound), "--",
                  color="gray", label='Lower bound of peaks')
-        plt.legend(fontsize=fontsize)
-        fig.tight_layout()
+        plt.legend(loc='lower right')
+        plt.tight_layout()
         plt.grid()
 
-        # Save the plot to a file if the logging level is DEBUG
-        if self.log_level == 'DEBUG':
-            plt.savefig(os.path.join(
-                self.run_dir, f'corr_resps_win-{self.win_coords[0]}-{self.win_coords[1]}.png'))
         if self.viz_corr_resp:
+            plt.savefig(os.path.join(
+                self.run_dir, f'corr_resps_win-{self.win_coords[0]}-{self.win_coords[1]}.jpg'))
             plt.show()
         plt.close('all')
