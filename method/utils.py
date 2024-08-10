@@ -3,9 +3,9 @@ import sparse
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button, Slider
-from metavision_core.event_io import EventsIterator, RawReader
+from metavision_core.event_io import EventsIterator
 from metavision_sdk_core import BaseFrameGenerationAlgorithm, RoiFilterAlgorithm
-from logger import logger
+from logger import assert_and_log, logger
 
 
 def generate_event_frame(events: np.ndarray, height: int, width: int) -> np.ndarray:
@@ -25,12 +25,12 @@ def generate_event_frame(events: np.ndarray, height: int, width: int) -> np.ndar
     return image[:, :, ::-1]  # Convert BGR to RGB
 
 
-def setup_roi(video_path: str, roi: dict, win_size: int) -> dict:
+def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
     """
     Set up the Region of Interest (ROI) for event processing.
 
     Args:
-        video_path (str): Path to the video file.
+        raw_reader (RawReader): RawReader object for the video file.
         roi (dict): Initial ROI coordinates.
         win_size (int): Size of a window See paper for details.
 
@@ -39,13 +39,12 @@ def setup_roi(video_path: str, roi: dict, win_size: int) -> dict:
     """
     selected_roi = []
     windows_patches = []
-    raw_reader = RawReader(video_path, max_events=int(3e7))
     height, width = raw_reader.get_size()
     acc_events = raw_reader.load_n_events(5e5)
     image = generate_event_frame(acc_events, height, width)
 
     fig, ax = plt.subplots(6, 1, figsize=(12, 9.5), gridspec_kw={
-                           'height_ratios': [5, .2, .1, .1, .1, .2]})
+                           'height_ratios': [5, .4, .1, .1, .1, .2]})
     plt.get_current_fig_manager().window.wm_geometry("+0+0")
 
     def remove_windows(windows_patches):
@@ -201,7 +200,7 @@ def list_to_dict(coords: list) -> dict:
     return {'x0': x0, 'y0': y0, 'x1': x1, 'y1': y1}
 
 
-def load_events(video_path: str, microseconds_to_read: int, roi_dict: dict) -> sparse.COO:
+def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict: dict) -> sparse.COO:
     """
     Load events from the video file within the specified ROI.
 
@@ -213,9 +212,7 @@ def load_events(video_path: str, microseconds_to_read: int, roi_dict: dict) -> s
     Returns:
         sparse.COO: Sparse array of events.
     """
-    # Initialize the raw reader with the video path
-    assert os.path.exists(video_path), f"File {video_path} not found"
-    raw_reader = RawReader(video_path, max_events=int(3e7))
+    assert_and_log(os.path.exists(video_path), f"File {video_path} not found")
     # Reset the reader to the beginning of the video
     raw_reader.reset()
     # Load events for the specified duration
