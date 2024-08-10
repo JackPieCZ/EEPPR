@@ -1,6 +1,7 @@
 import os
 import gdown
 import json
+from logger import assert_and_log, logger
 
 
 def download_sequence(sequence_name: str, file_path: str, url_id: str) -> None:
@@ -31,14 +32,20 @@ def get_sequence_path_roi(sequence_name: str) -> str:
     seq_names = config_data['sequence_names']
 
     # Ensure the provided sequence name is in the list of valid names
-    assert sequence_name in seq_names, f"Sequence {sequence_name} not found."\
-        f"The sequence name must be one of {seq_names}"
+    assert_and_log(sequence_name in seq_names,
+                   f"Sequence {sequence_name} not found. The sequence name must be one of {seq_names}")
 
     seq_info = config_data['sequence_info'][sequence_name]
     file_path = os.path.join(dataset_dir, seq_info['raw_filepath'])
-    seq_dir = os.path.dirname(file_path)
-    [os.remove(os.path.join(seq_dir, file))
-     for file in os.listdir(seq_dir) if file.endswith(".tmp_index")]
+
+    # Remove temporary index files if they exist
+    for file in os.listdir(os.path.dirname(file_path)):
+        if file.endswith(".tmp_index"):
+            try:
+                os.remove(os.path.join(os.path.dirname(file_path), file))
+            except PermissionError:
+                logger.warning(
+                    f"Unable to remove temporary index file {file}. The file will be removed on the next run.")
 
     # Check if the file exists, if not, attempt to download it from Metavision dataset
     if not os.path.exists(file_path):
@@ -47,16 +54,16 @@ def get_sequence_path_roi(sequence_name: str) -> str:
         else:
             raise FileNotFoundError(
                 f"File {file_path} not found.")
-    assert os.path.exists(file_path), f"File {file_path} not found"
+    assert_and_log(os.path.exists(file_path), f"File {file_path} not found")
 
     # Load the proposed ROI coordinates for the sequence
     roi_coords = seq_info['roi']
-    assert roi_coords, f"No ROI coordinates found for sequence {sequence_name}. "\
-        "Please open an issue on the repository."
+    assert_and_log(roi_coords, f"No ROI coordinates found for sequence {sequence_name}. "
+                   "Please open an issue on GitHub.")
     return file_path, roi_coords
 
 
 if __name__ == '__main__':
     # Example usage -> prints the file path and roi of the given sequence
-    print(get_sequence_path_roi('highcontrastline'))
-    print(get_sequence_path_roi('highcontrastdot'))
+    print(get_sequence_path_roi('led'))
+    print(get_sequence_path_roi('screen'))
