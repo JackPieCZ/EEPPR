@@ -124,8 +124,8 @@ if __name__ == "__main__":
                         help='Device to run 3D correlation computations on (default: cuda:0)')
     parser.add_argument('--log', '-l', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Logging level (default: INFO)')
-    parser.add_argument('--verbose', '-v',
-                        action='store_true', help='Verbose mode')
+    parser.add_argument('--verbose', '-v', action='store_true',
+                        help='Verbose mode')
     parser.add_argument('--output_dir', '-o', type=str,
                         help='Name of output directory (default: ./ee3p3d_out)', default='./ee3p3d_out')
 

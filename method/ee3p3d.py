@@ -125,14 +125,14 @@ class EE3P3D:
         """
         # Initialize the result array with -1.0
         freq_arr = np.full((x_windows_num, y_windows_num), -1.0)
-
+        logger.debug(f'Number of windows: {x_windows_num=}, {y_windows_num=}')
+        
         # Iterate over each window in the grid
         for x_win, y_win in (pbar := tqdm(np.ndindex(x_windows_num, y_windows_num), total=x_windows_num * y_windows_num, position=1, leave=False)):
             self.win_coords = (x_win, y_win)
             logger.debug(
-                f'Analysing events within window x={x_win}, y={y_win}, total windows: {x_windows_num * y_windows_num}')
-            pbar.set_description(
                 f'Analysing events within window x={x_win}, y={y_win}')
+            pbar.set_description(f'Window x={x_win}, y={y_win}')
 
             # Calculate the start and end coordinates for the current window
             x_start = x_win * self.win_size + self.roi_coords['x0']
@@ -185,12 +185,11 @@ class EE3P3D:
             corr_out = corr_out.detach().cpu().numpy()
 
             # Calculate the derivative of the correlation output
-            derivative = np.diff(corr_out)
-            max_derivative = np.max(np.abs(derivative))
+            max_derivative = np.max(np.abs(np.diff(corr_out)))
 
             # Skip if the maximum derivative is too high
+            logger.debug(f'Max derivative: {max_derivative}')
             if max_derivative > 3900:
-                logger.debug(f'Max derivative: {max_derivative}')
                 return
 
             # Find periodic peaks in the correlation output
