@@ -19,10 +19,10 @@ def main(args):
         args (argparse.Namespace): Command-line arguments.
     """
     setup_logger(run_dir, args.log)
-    assert_and_log(args.aggreg_t > 0,
-                   "Aggregation interval must be greater than 0, reccomended 100")
-    assert_and_log(args.read_t > 0,
-                   "Read time must be greater than 0, reccomended 1000000")
+    assert_and_log(0 < args.aggreg_t < args.read_t,
+                   "Aggregation interval must be greater than 0 and less than read_t, reccomended 100")
+    assert_and_log(args.aggreg_t < args.read_t,
+                   "Read time must be greater than aggreg_t, reccomended 1000000")
     assert_and_log(args.win_size > 0,
                    "Window size must be greater than 0, reccomended 45")
     assert_and_log(args.event_count > 0,
