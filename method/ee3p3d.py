@@ -5,7 +5,7 @@ import einops
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from matplotlib import ticker
 from torch.nn import functional as F
 from torch.nn import Unfold
@@ -47,16 +47,25 @@ class EE3P3D:
         Returns:
             float: Estimated frequency in Hz.
         """
+        main_pbar = tqdm(total=5, desc='Running EE3P3D method', leave=False,
+                         bar_format="{l_bar}|{bar}| {n_fmt}/{total_fmt}{postfix}")
         # Load events from input file
+        # if self.verbose:
+        main_pbar.set_description('Loading events...')
+        logger.debug(f'Loading events from input file: {self.input_file_path=}, {self.read_t=}, {self.roi_coords=}')
         sparse_ev_arr = load_events(
             self.input_file_path, self.reader, self.read_t, self.roi_coords)
+        main_pbar.update(1)
         
         # Delete the reader to free up memory
         del self.reader
         
         # Quantize events and convert to torch tensor
+        main_pbar.set_description('Quantizing events...')
+        logger.debug(f'Quantizing events: {self.aggreg_t=}')
         quantized_events = torch.from_numpy(quantize_events(self.input_file_path, self.read_t, self.roi_coords, self.aggreg_t)[None])\
             .to(self.device)
+        main_pbar.update(1)
 
         # Calculate the number of windows in x and y directions
         roi_width = self.roi_coords['x1'] - self.roi_coords['x0']
@@ -65,16 +74,23 @@ class EE3P3D:
         y_windows_num = (roi_height + 1) // self.win_size
 
         # Create an unfold function to partition the events into windows
+        main_pbar.set_description('Partitioning events...')
+        logger.debug(f'Partitioning events into windows: {x_windows_num=}, {y_windows_num=}, {self.win_size=}')
         unfold_fn = Unfold(kernel_size=(self.win_size,
                            self.win_size), stride=self.win_size)
         partitioned_events = einops.rearrange(unfold_fn(quantized_events), '1 (b w h) (y x) -> b w h y x',
                                               x=x_windows_num, y=y_windows_num, w=self.win_size, h=self.win_size)
+        main_pbar.update(1)
         # Delete the original events tensor to free up memory
         del quantized_events
         
         # Perform 3D correlation on the event data
+        main_pbar.set_description(
+            'Computing 3D correlation...')
+        logger.debug('Performing 3D correlation on the event data')
         estim_freq_arr = self.correlate_3d(
             sparse_ev_arr, x_windows_num, y_windows_num, partitioned_events)
+        main_pbar.update(1)
         
         # Delete the sparse array and partitioned events tensor to free up memory
         del sparse_ev_arr, partitioned_events
@@ -85,9 +101,12 @@ class EE3P3D:
             return self.run()
 
         # Apply the aggregation function to aggregate the estimations from all windows
+        main_pbar.set_description('Aggregating results...')
         aggreg_fn = getattr(np, self.aggreg_fn.lower())
         result = np.round(
             aggreg_fn(estim_freq_arr[estim_freq_arr > 0]), self.precision)
+        main_pbar.update(1)
+        main_pbar.close()
 
         return result
 
@@ -108,7 +127,7 @@ class EE3P3D:
         freq_arr = np.full((x_windows_num, y_windows_num), -1.0)
 
         # Iterate over each window in the grid
-        for x_win, y_win in (pbar := tqdm(np.ndindex(x_windows_num, y_windows_num), total=x_windows_num * y_windows_num)):
+        for x_win, y_win in (pbar := tqdm(np.ndindex(x_windows_num, y_windows_num), total=x_windows_num * y_windows_num, position=1, leave=False)):
             self.win_coords = (x_win, y_win)
             logger.debug(
                 f'Analysing events within window x={x_win}, y={y_win}, total windows: {x_windows_num * y_windows_num}')
