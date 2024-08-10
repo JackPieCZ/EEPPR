@@ -197,7 +197,7 @@ class EE3P3D:
             logger.debug(f'Estimated frequency: {freq_arr[y_win, x_win]} Hz')
 
         # Return the array of estimated rotations per second for each window
-        return win_rps_arr
+        return freq_arr
 
     def find_periodic_peaks(self, corr_out: np.ndarray) -> np.ndarray:
         """
