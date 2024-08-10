@@ -108,7 +108,7 @@ class EE3P3D:
         main_pbar.update(1)
         main_pbar.close()
 
-        return result
+        return result, estim_freq_arr
 
     def correlate_3d(self, sparse_ev_arr: sparse.COO, x_windows_num: int, y_windows_num: int, partitioned_events: torch.Tensor):
         """

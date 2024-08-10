@@ -19,20 +19,27 @@ def main(args):
         args (argparse.Namespace): Command-line arguments.
     """
     setup_logger(run_dir, args.log)
-    assert_and_log(args.aggreg_t > 0, "Aggregation interval must be greater than 0, reccomended 100")
-    assert_and_log(args.read_t > 0, "Read time must be greater than 0, reccomended 1000000")
-    assert_and_log(args.win_size > 0, "Window size must be greater than 0, reccomended 45")
-    assert_and_log(args.event_count > 0, "Event count threshold must be greater than 0, reccomended 1800")
-    
-    logger.info(f"EE3P3D method started with sequence '{args.file}', Window size: {args.win_size}px, Event count threshold: {args.event_count}, Aggregation interval: {args.aggreg_t}us, Read time: {args.read_t}us, Aggregation function: {args.aggreg_fn}")
+    assert_and_log(args.aggreg_t > 0,
+                   "Aggregation interval must be greater than 0, reccomended 100")
+    assert_and_log(args.read_t > 0,
+                   "Read time must be greater than 0, reccomended 1000000")
+    assert_and_log(args.win_size > 0,
+                   "Window size must be greater than 0, reccomended 45")
+    assert_and_log(args.event_count > 0,
+                   "Event count threshold must be greater than 0, reccomended 1800")
+
+    logger.info(
+        f"EE3P3D method started with sequence '{args.file}', Window size: {args.win_size}px, Event count threshold: {args.event_count}, Aggregation interval: {args.aggreg_t} us, Read time: {args.read_t} us, Aggregation function: {args.aggreg_fn}")
 
     # Check if file is from EE3P3D dataset
     if args.file in seq_names:
         args.file, args.roi_coords = get_sequence_path_roi(args.file)
     else:
-        assert_and_log(os.path.exists(args.file), f"File {args.file} not found")
-        assert_and_log(args.file.lower().endswith('.raw'), "File must be in .raw format")
-        
+        assert_and_log(os.path.exists(args.file),
+                       f"File {args.file} not found")
+        assert_and_log(args.file.lower().endswith(
+            '.raw'), "File must be in .raw format")
+
     raw_reader = RawReader(args.file, max_events=int(3e7))
 
     if isinstance(args.roi_coords, list):
@@ -45,8 +52,24 @@ def main(args):
 
     # Initialize and run EE3P3D
     ee3p3d = EE3P3D(args, run_dir, raw_reader)
-    result = ee3p3d.run()
+    result, freq_arr = ee3p3d.run()
 
+    if args.all_results:
+        # Log the frequency estimation for each window
+        logger.info("Estimated frequency per window:")
+        for row in freq_arr:
+            formatted_row = [
+                f'{np.round(freq, args.decimals):.{args.decimals}f}' if freq > 0 else 'X' for freq in row]
+            logger.info('[' + ' | '.join(f'{{:>{5 + args.decimals}}}'.format(item)
+                                         for item in formatted_row) + ']')
+
+        # Log the results of the other aggregation functions
+        results = []
+        for func_name in ['min', 'median', 'mean', 'max']:
+            value = getattr(np, func_name)(freq_arr[freq_arr > 0])
+            results.append(
+                f"{func_name.capitalize()}: {value:.{args.decimals}f} Hz")
+        logger.info(" | ".join(results))
     logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
     return result
 
@@ -66,7 +89,8 @@ if __name__ == "__main__":
             config_data = json.load(f)
             f.close()
     except FileNotFoundError:
-        logger.error(f"Dataset configuration file {config_filepath} not found. Please verify you have downloaded the whole EE3P3D repository.")
+        logger.error(
+            f"Dataset configuration file {config_filepath} not found. Please verify you have downloaded the whole EE3P3D repository.")
         raise FileNotFoundError(
             f"Dataset configuration file {config_filepath} not found. Please verify you have downloaded the whole EE3P3D repository.")
     seq_names = config_data['sequence_names']
@@ -94,16 +118,19 @@ if __name__ == "__main__":
                         help='Threshold for template event count (default: 1800, recommended not to change, see our paper)')
     parser.add_argument('--viz_corr_resp', '-vcr', action='store_true',
                         help='Visualize correlation responses for each window')
+    parser.add_argument('--all_results', '-ar', action='store_true',
+                        help='Show results from all windows')
     parser.add_argument('--device', '-d', type=str, default='cuda:0',
                         help='Device to run 3D correlation computations on (default: cuda:0)')
     parser.add_argument('--log', '-l', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Logging level (default: INFO)')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Verbose mode')
+    parser.add_argument('--verbose', '-v',
+                        action='store_true', help='Verbose mode')
     parser.add_argument('--output_dir', '-o', type=str,
                         help='Name of output directory (default: ./ee3p3d_out)', default='./ee3p3d_out')
 
     args = parser.parse_args()
     run_dir = os.path.join(
-        args.output_dir, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}',)
+        args.output_dir, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
     os.makedirs(run_dir, exist_ok=True)
     print(main(args))
