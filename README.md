@@ -116,6 +116,7 @@ print(f"CUDA is available: {torch.cuda.is_available()}")
 if not torch.cuda.is_available():
    print("CUDA is not available.")
    print("When running the EE3P3D method, please use '--device cpu' flag.")
+
 exit()
 
 python ./method/test_imports.py
@@ -167,44 +168,49 @@ python ./method/main.py -f path/to/your/event_file.raw --device cpu
 python ./method/main.py -h 
 ```
 ```
-usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--aggreg_t AGGREG_T] [--read_t READ_T] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE] [--event_count EVENT_COUNT] [--viz_corr_resp] [--device DEVICE] [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
-               [--output_dir OUTPUT_DIR]
+usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--aggreg_t AGGREG_T] [--read_t READ_T] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE] [--event_count EVENT_COUNT] [--viz_corr_resp] [--device DEVICE]
+               [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--verbose] [--output_dir OUTPUT_DIR]
+
+Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in event-based sequence using the EE3P3D method.
 
 optional arguments:
   -h, --help            show this help message and exit
   --file FILE, -f FILE  Filepath to the file to read events from (.raw) or name of a sequence from EE3P3D dataset: ['highcontrastline', 'velcro_front', 'velcro_side', 'highcontrastdot', 'handspinner', 'spider', 'led', 'screen', 'speaker', 'motor', 'chain_side', 'chain_top']
   --roi_coords X0 Y0 X1 Y1, -rc X0 Y0 X1 Y1
                         RoI coordinates of the object to track (X0 Y0 X1 Y1)
-  --skip_roi_gui        Flag to skip the RoI setup GUI if --roi_coords are provided
-  --viz_corr_resp, -vcr
-                        Visualize correlation responses for each window
-  --device DEVICE, -d DEVICE
-                        Device to run 3D correlation computations on (default: cuda:0)
   --aggreg_t AGGREG_T, -t AGGREG_T
                         Events aggregation interval in microseconds (default: 100)
   --read_t READ_T, -r READ_T
                         Number of microseconds to read events from the file (default: 1000000)
   --aggreg_fn {mean,median,max,min}, -afn {mean,median,max,min}
-                        The function used to aggregate measurements from all windows (default: median)
+                        Name of a NumPy function used to aggregate measurements from all windows (default: median)
   --decimals DECIMALS, -dp DECIMALS
                         Number of decimal places to round the result to (default: 1)
+  --skip_roi_gui, -srg  Flag to skip the RoI setup GUI if --roi_coords are provided
   --win_size WIN_SIZE, -w WIN_SIZE
                         Window size in pixels (default: 45, recommended not to change, see our paper)
   --event_count EVENT_COUNT, -N EVENT_COUNT
                         Threshold for template event count (default: 1800, recommended not to change, see our paper)
+  --viz_corr_resp, -vcr
+                        Visualize correlation responses for each window
+  --device DEVICE, -d DEVICE
+                        Device to run 3D correlation computations on (default: cuda:0)
   --log {DEBUG,INFO,WARNING,ERROR,CRITICAL}, -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}
                         Logging level (default: INFO)
+  --verbose, -v         Verbose mode
+  --output_dir OUTPUT_DIR, -o OUTPUT_DIR
+                        Name of output directory (default: ./ee3p3d_out)
 ```
 
 ## Troubleshooting
 
 If you encounter any issues during installation or running the method, please check the following:
 
-- `Metavision SDK Driver error 103001`: You are trying to open a file using a filepath that contains some special characters. [Solution here](https://docs.prophesee.ai/stable/faq.html#why-do-i-get-errors-when-trying-to-read-recorded-files-raw-or-hdf5-with-studio-or-the-api-on-windows)
-- `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver, otherwise use the `--device cpu` flag when running the method.
-- Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script.
-- Verify that you're using the correct Python version (3.9) within the Anaconda environment.
-- Ensure your CUDA installation matches the version specified by the Anaconda environment version.
+- `Metavision SDK Driver error 103001`: You are trying to open a file using a filepath that contains some special characters ([Metavision FAQ](https://docs.prophesee.ai/stable/faq.html#why-do-i-get-errors-when-trying-to-read-recorded-files-raw-or-hdf5-with-studio-or-the-api-on-windows))
+- For other Metavision related issues, see their [Troubleshooting guide](https://docs.prophesee.ai/stable/faq.html#troubleshooting)
+- `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver, otherwise use the `--device cpu` flag when running the method
+- Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script
+- Ensure your CUDA installation matches the version specified by the Anaconda environment version
 
 If problems persist, please open an issue with details about your setup and the error you're encountering.
 
