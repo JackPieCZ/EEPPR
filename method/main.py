@@ -121,7 +121,7 @@ if __name__ == "__main__":
     parser.add_argument('--viz_corr_resp', '-vcr', action='store_true',
                         help='Visualize correlation responses for each window')
     parser.add_argument('--all_results', '-ar', action='store_true',
-                        help='Show results from all windows')
+                        help='Output results from all windows')
     parser.add_argument('--device', '-d', type=str, default='cuda:0',
                         help='Device to run 3D correlation computations on (default: cuda:0)')
     parser.add_argument('--log', '-l', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],

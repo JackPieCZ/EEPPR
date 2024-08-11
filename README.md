@@ -144,7 +144,7 @@ python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300
 
 4. A simple GUI is presented to the user for verifying, selecting, modifying and replacing the RoI. If `--roi_coords` are provided (or the sequence if from the EE3P3D dataset), the GUI can be skipped by using `--skip_roi_gui`/`-srg` flag:
 ```console
-python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300 --skip_roi_gui
+python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300 -srg
 ```
 
 5. Using a different aggregation function (`mean`, `median`, `max`, `min` or other NumPy functions) for aggregating measurements from all windows (optional, `--aggreg_fn`/`-afn`). By default, `median` is used.
@@ -152,30 +152,42 @@ python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300 --ski
 python ./method/main.py -f path/to/your/event_file.raw --aggreg_fn mean
 ```
 
-6. Visualize correlation responses and their peaks for each window (optional, `--viz_corr_resp`/`-vcr`):
+6. If you instead prefer to obtain measurements from all windows, you can make the method output the whole NumPy array of measured frequencies using optional flag `--all_results` or `-ar`:
+```console
+python ./method/main.py -f motor -ar
+```
+
+7. Visualize correlation responses and their peaks for each window in an interactive plot (optional, `--viz_corr_resp`/`-vcr`):
 ```console 
 python ./method/main.py -f handspinner -vcr
 ```
 
-7. Running on a specific device (optional, `--device`/`-d`, default is `cuda:0`):
+8. Run 3D correlation computations on a specific device (optional, `--device`/`-d`, default is `cuda:0`):
 ```console
 python ./method/main.py -f path/to/your/event_file.raw --device cuda:1
 python ./method/main.py -f path/to/your/event_file.raw --device cpu
 ```
 
-8. For a full list of available options, run:
+9. Logs are automatically saved into `--output_dir` (default: ./ee3p3d_out). If used with `--viz_corr_resp`, all plots are also saved here as `.jpg` files.
+
+10. To set the level of logs printed in the console (DEBUG,INFO,WARNING,ERROR,CRITICAL) use the `--log`/`-l` flag (default: INFO). If you prefer to not use DEBUG logging level but want to get more information on why analysis of events within some windows did not produce any measurements, use the `--verbose`/`-v` flag.
+```console 
+python ./method/main.py -f handspinner -v
+```
+
+For a full list of available options, run:
 ```console
 python ./method/main.py -h 
 ```
 ```
-usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--aggreg_t AGGREG_T] [--read_t READ_T] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE] [--event_count EVENT_COUNT] [--viz_corr_resp] [--device DEVICE]
+usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--aggreg_t AGGREG_T] [--read_t READ_T] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE] [--event_count EVENT_COUNT] [--viz_corr_resp] [--all_results] [--device DEVICE]
                [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--verbose] [--output_dir OUTPUT_DIR]
 
 Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in event-based sequence using the EE3P3D method.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --file FILE, -f FILE  Filepath to the file to read events from (.raw) or name of a sequence from EE3P3D dataset: ['highcontrastline', 'velcro_front', 'velcro_side', 'highcontrastdot', 'handspinner', 'spider', 'led', 'screen', 'speaker', 'motor', 'chain_side', 'chain_top']
+  --file FILE, -f FILE  Filepath to the file to read events from (.raw) or name of a sequence from EE3P3D dataset: ['highcontrastline', 'velcro_front', 'velcro_side', 'highcontrastdot', 'handspinner', 'spider', 'led', 'screen', 'speaker', 'motor', 'chain_side', 'chain_top'] 
   --roi_coords X0 Y0 X1 Y1, -rc X0 Y0 X1 Y1
                         RoI coordinates of the object to track (X0 Y0 X1 Y1)
   --aggreg_t AGGREG_T, -t AGGREG_T
@@ -193,6 +205,7 @@ optional arguments:
                         Threshold for template event count (default: 1800, recommended not to change, see our paper)
   --viz_corr_resp, -vcr
                         Visualize correlation responses for each window
+  --all_results, -ar    Output results from all windows
   --device DEVICE, -d DEVICE
                         Device to run 3D correlation computations on (default: cuda:0)
   --log {DEBUG,INFO,WARNING,ERROR,CRITICAL}, -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}
