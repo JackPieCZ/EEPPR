@@ -70,8 +70,10 @@ def main(args):
             results.append(
                 f"{func_name.capitalize()}: {value:.{args.decimals}f} Hz")
         logger.info(" | ".join(results))
-    logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
-    return result
+        return freq_arr
+    else:
+        logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
+        return result
 
 
 if __name__ == "__main__":
