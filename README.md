@@ -55,7 +55,7 @@ Tested on, but same versions (probably) not required:
       - Verify your system is compatible by checking the [Required Configuration section](https://docs.prophesee.ai/4.5.2/installation/windows.html#required-configuration)
       - Whether you are installing the SDK for the first time or are currently using a previous version, you must download our Windows installer, which is hosted in an installer repository. The URL of this repository can be retrieved this way:
          - If you are a Prophesee customer, retrieve the link in the [Knowledge Center Download section](https://support.prophesee.ai/portal/en/kb/prophesee-1/metavision-sdk/download-center). ([request an account](https://www.prophesee.ai/kc-access-request/) if you don’t have one yet).
-         - Otherwise, you must [sign-up for the SDK](https://www.prophesee.ai/metavision-intelligence-sdk-download) to get the link.
+         - Otherwise, you must [sign up for the SDK](https://www.prophesee.ai/metavision-intelligence-sdk-download) to get the link.
 
       - Once you have access to our installer repository, among the list of SDK installers, download the `Metavision_SDK_440_Setup.exe` and install it using default settings.
    - For Linux
@@ -63,7 +63,7 @@ Tested on, but same versions (probably) not required:
       - Verify your system is compatible by checking the [Required Configuration section](https://docs.prophesee.ai/4.5.2/installation/linux.html#required-configuration)
       - Whether you are installing the SDK for the first time or are currently using a previous version, to install Metavision SDK on Linux, you need our APT repository configuration file `metavision.list`.
          - If you are a Prophesee customer, retrieve the link in the [Knowledge Center Download section](https://support.prophesee.ai/portal/en/kb/prophesee-1/metavision-sdk/download-center). ([request an account](https://www.prophesee.ai/kc-access-request/) if you don’t have one yet).
-         - Otherwise, you must [sign-up for the SDK](https://www.prophesee.ai/metavision-intelligence-sdk-download) to get the link.
+         - Otherwise, you must [sign up for the SDK](https://www.prophesee.ai/metavision-intelligence-sdk-download) to get the link.
 
       - Continue with [Installing Dependencies](https://docs.prophesee.ai/4.5.2/installation/linux.html#installing-dependencies) and [Installation](https://docs.prophesee.ai/4.5.2/installation/linux.html#installation) steps
    
@@ -84,7 +84,7 @@ cd EE3P3D
       ```bash
       %windir%\System32\cmd.exe "/K" C:\Users\<user_name>\Scripts\activate.bat C:\Users\<user_name>\miniconda3
       ```
-   - Verify conda is installed. A list of commands should appear.
+   - Verify that conda is installed. A list of commands should appear.
    ```console
    conda
    ```
@@ -137,7 +137,7 @@ python ./method/main.py --file path/to/your/event_file.raw
 python ./method/main.py -f led
 ```
 
-3. Specifying RoI coordinates (optional, `--roi_coords`/`-rc`) in `X0 Y0 X1 Y1` format. RoI for sequences from the dataset are provided automatically. If the coordinates are not provided, a GUI will be shown where the user can setup RoI easily.
+3. Specifying RoI coordinates (optional, `--roi_coords`/`-rc`) in `X0 Y0 X1 Y1` format. RoI for sequences from the dataset are provided automatically. If the coordinates are not provided, a GUI will be shown where the user can set RoI easily.
 ```console
 python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300
 ```
@@ -152,7 +152,7 @@ python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300 -srg
 python ./method/main.py -f path/to/your/event_file.raw --aggreg_fn mean
 ```
 
-6. If you instead prefer to obtain measurements from all windows, you can make the method output the whole NumPy array of measured frequencies using optional flag `--all_results` or `-ar`:
+6. If you instead prefer to obtain measurements from all windows, you can make the method output the whole NumPy array of measured frequencies using the optional flag `--all_results` or `-ar`:
 ```console
 python ./method/main.py -f motor -ar
 ```
@@ -170,7 +170,7 @@ python ./method/main.py -f path/to/your/event_file.raw --device cpu
 
 9. Logs are automatically saved into `--output_dir` (default: ./ee3p3d_out). If used with `--viz_corr_resp`, all plots are also saved here as `.jpg` files.
 
-10. To set the level of logs printed in the console (DEBUG,INFO,WARNING,ERROR,CRITICAL) use the `--log`/`-l` flag (default: INFO). If you prefer to not use DEBUG logging level but want to get more information on why analysis of events within some windows did not produce any measurements, use the `--verbose`/`-v` flag.
+10. To set the level of logs printed in the console (DEBUG, INFO, WARNING, ERROR, CRITICAL), use the `--log`/`-l` flag (default: INFO). If you prefer not to use the DEBUG logging level but want to get more information on why the analysis of events within some windows did not produce any measurements, use the `--verbose`/`-v` flag.
 ```console 
 python ./method/main.py -f handspinner -v
 ```
@@ -183,7 +183,7 @@ python ./method/main.py -h
 usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--aggreg_t AGGREG_T] [--read_t READ_T] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE] [--event_count EVENT_COUNT] [--viz_corr_resp] [--all_results] [--device DEVICE]
                [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--verbose] [--output_dir OUTPUT_DIR]
 
-Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in event-based sequence using the EE3P3D method.
+Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in an event-based sequence using the EE3P3D method.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -219,9 +219,9 @@ optional arguments:
 
 If you encounter any issues during installation or running the method, please check the following:
 
-- `Metavision SDK Driver error 103001`: You are trying to open a file using a filepath that contains some special characters ([Metavision FAQ](https://docs.prophesee.ai/stable/faq.html#why-do-i-get-errors-when-trying-to-read-recorded-files-raw-or-hdf5-with-studio-or-the-api-on-windows))
-- For other Metavision related issues, see their [Troubleshooting guide](https://docs.prophesee.ai/stable/faq.html#troubleshooting)
-- `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver, otherwise use the `--device cpu` flag when running the method
+- `Metavision SDK Driver error 103001`: You are trying to open a file using a file path that contains some special characters ([Metavision FAQ](https://docs.prophesee.ai/stable/faq.html#why-do-i-get-errors-when-trying-to-read-recorded-files-raw-or-hdf5-with-studio-or-the-api-on-windows))
+- For other Metavision-related issues, see their [Troubleshooting guide](https://docs.prophesee.ai/stable/faq.html#troubleshooting)
+- `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver otherwise use the `--device cpu` flag when running the method
 - Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script
 - Ensure your CUDA installation matches the version specified by the Anaconda environment version
 
@@ -229,7 +229,7 @@ If problems persist, please open an issue with details about your setup and the 
 
 ## License:
 
-The code and dataset is provided under the GPL-3.0 license. Please refer to the LICENSE file for details.
+The code and dataset are provided under the GPL-3.0 license. Please refer to the LICENSE file for details.
 We encourage you to use them responsibly and cite the paper if you use it in your work:
 ```
 (soon)
