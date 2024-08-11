@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description='Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in event-based sequence using the EE3P3D method.')
+        description='Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in an event-based sequence using the EE3P3D method.')
     parser.add_argument('--file', '-f', required=True, type=str,
                         help=f'Filepath to the file to read events from (.raw) or name of a sequence from EE3P3D dataset: {seq_names}')
     parser.add_argument('--roi_coords', '-rc', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
