@@ -54,25 +54,18 @@ def main(args):
     ee3p3d = EE3P3D(args, run_dir, raw_reader)
     result, freq_arr = ee3p3d.run()
 
-    if args.all_results:
-        # Log the frequency estimation for each window
-        logger.info("Estimated frequency per window:")
-        for row in freq_arr:
-            formatted_row = [
-                f'{np.round(freq, args.decimals):.{args.decimals}f}' if freq > 0 else 'X' for freq in row]
-            logger.info('[' + ' | '.join(f'{{:>{5 + args.decimals}}}'.format(item)
-                                         for item in formatted_row) + ']')
+    # Log the frequency estimation for each window
+    logger.info("Estimated frequency per window:")
+    for row in freq_arr:
+        formatted_row = [
+            f'{np.round(freq, args.decimals):.{args.decimals}f}' if freq > 0 else 'X' for freq in row]
+        logger.info('[' + ' | '.join(f'{{:>{5 + args.decimals}}}'.format(item)
+                                        for item in formatted_row) + ']')
 
-        # Log the results of the other aggregation functions
-        results = []
-        for func_name in ['min', 'median', 'mean', 'max']:
-            value = getattr(np, func_name)(freq_arr[freq_arr > 0])
-            results.append(
-                f"{func_name.capitalize()}: {value:.{args.decimals}f} Hz")
-        logger.info(" | ".join(results))
+    logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
+    if args.all_results:
         return freq_arr
     else:
-        logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
         return result
 
 
