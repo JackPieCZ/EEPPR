@@ -5,3 +5,4 @@ Data visualised:
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=OHjNZRowd8g)
 
 250ms of the data visualised in XYTime space:
+![spider_xyt_dark2+_upscayl_3x_remacri](https://github.com/user-attachments/assets/a45201ad-15e6-4e72-b72f-5b7bc938be49)
