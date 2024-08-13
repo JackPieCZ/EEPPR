@@ -15,8 +15,8 @@ Data visualised:
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=97ZCfkCUYow)
 - at 0.006x playback (5000 fps) - [link](https://www.youtube.com/watch?v=g8umk0LYKbA)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/line_xyt_dark.png)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/f7e53d63-5c10-4d68-a89a-57f8fc02e76f)
 
 ### 02 - Velcro (front view) - 21.1Hz
 Data visualised:
@@ -24,8 +24,8 @@ Data visualised:
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=ZXUVfbVnecA)
 - at 0.006x playback (5000 fps) - [link](https://www.youtube.com/watch?v=yIZIeimYJkg)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/velcro_xyt_dark.png)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/3c53dd96-8658-4578-8bb3-dc9c2bdcc149)
 
 ### 03 - Velcro (side view) - 26.3Hz
 Data visualised:
@@ -33,8 +33,8 @@ Data visualised:
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=eJjkLXgL93k)
 - at 0.006x playback (5000 fps) - [link](https://www.youtube.com/watch?v=C3gk-qhQhUc)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/velcroside_xyt_dark.png)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/8d53593a-336e-4163-8d75-d9ccfda3e85c)
 
 ### 04 - High Contrast Dot - 19.6Hz
 Data visualised:
@@ -42,17 +42,16 @@ Data visualised:
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=sBFWObrqTRw)
 - at 0.006x playback (5000 fps) - [link](https://www.youtube.com/watch?v=_X_kiPSN3eA)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/spinner_xyt_dark3_upscayl_4x_remacri.jpg)
-
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/2bcb7bec-0fdf-4075-bb46-03d211df3a13)
 ### 05 - Hand Spinner - 4.7Hz
 Data visualised:
 - at 0.3x playback (100 fps) - [link](https://www.youtube.com/watch?v=dQoZ3sYXSMk)
 - at 0.06x playback (500 fps) - [link](https://www.youtube.com/watch?v=Ts-PXfplstc)
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=XqCd8Bcq3yI)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/hand_spinner_xyt_dark2_upscayl_3x_remacri.jpg)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/cf02aa50-50c1-4acb-b621-6797d7d71fd5)
 
 ### 06 - Spider - 3.2Hz
 Data visualised:
@@ -60,8 +59,8 @@ Data visualised:
 - at 0.06x playback (500 fps) - [link](https://www.youtube.com/watch?v=tfkJPhfbH0M)
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=OHjNZRowd8g)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/spider_xyt_dark2+_upscayl_3x_remacri.jpg)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/a45201ad-15e6-4e72-b72f-5b7bc938be49)
 
 ## Flicker
 ### 07 - LED - 2000Hz
@@ -70,8 +69,8 @@ Data visualised:
 - at 0.0006x playback (50000 fps) - [link](https://www.youtube.com/watch?v=fQmqazVNV-E)
 - at 0.0003x playback (100000 fps) - [link](https://www.youtube.com/watch?v=p2XcjC8q48U)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/led_xyt_upscayl_2x_remacri.jpg)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/8f555d36-7b2a-4442-883e-e77a7612f48d)
 
 ### 08 - Screen - 240Hz
 Data visualised:
@@ -79,8 +78,8 @@ Data visualised:
 - at 0.003x playback (10000 fps) - [link](https://www.youtube.com/watch?v=ozFZe9bQNm8)
 - at 0.0006x playback (50000 fps) - [link](https://www.youtube.com/watch?v=aQpxOLzbDCo)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/screen_xyt_dark2_upscayl_3x_remacri.jpg)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/c0897771-05ce-41a8-9ae7-20d657330513)
 
 ## Vibration
 ### 09 - Speaker - 98Hz
@@ -89,8 +88,8 @@ Data visualised:
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=Yna8W5JxCm4)
 - at 0.006x playback (5000 fps) - [link](https://www.youtube.com/watch?v=yRzxBWj3Nyk)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/speaker_xyt_dark.png)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/75581d3e-9664-4794-bd7f-aa4fbcb4aa72)
 
 ### 10 - Motor - 40Hz
 Data visualised:
@@ -98,8 +97,8 @@ Data visualised:
 - at 0.06x playback (500 fps) - [link](https://www.youtube.com/watch?v=bcsYxeoVlKQ)
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=7YLkZ4aHVbg)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/motor_xyt_dark2_upscayl_4x_remacri.jpg)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/4e8a26c6-43d7-4c02-a095-2341f3f79d40)
 
 ## Movement
 ### 11 - Chain Side - 28.7Hz
@@ -108,8 +107,8 @@ Data visualised:
 - at 0.06x playback (500 fps) - [link](https://www.youtube.com/watch?v=Bc_3LB_H-SA)
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=1NmrYGEQFLk)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/chain_side_xyt_dark2_upscayl_4x_remacri.jpg)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/5816c651-509c-4fc7-9d56-21b8c5d97ea6)
 
 ### 12 - Chain Top - 23Hz
 Data visualised:
@@ -117,5 +116,5 @@ Data visualised:
 - at 0.06x playback (500 fps) - [link](https://www.youtube.com/watch?v=k46kagKaVos)
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=c8EY6fqjG6s)
 
-A portion of the data visualised in XYTime space:
-![Data visualised in XYTime space](./xx_images/chain_top_xyt_dark+.jpg)
+250ms of the data visualised in XYTime space:
+![Data visualised in XYTime space](https://github.com/user-attachments/assets/a3ed43cd-def1-4f8e-9e2f-0edee9bd1f07)
