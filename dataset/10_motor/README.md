@@ -8,3 +8,4 @@ Data visualised:
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=7YLkZ4aHVbg)
 
 250ms of the data visualised in XYTime space:
+![motor_xyt_dark2_upscayl_4x_remacri](https://github.com/user-attachments/assets/4e8a26c6-43d7-4c02-a095-2341f3f79d40)
