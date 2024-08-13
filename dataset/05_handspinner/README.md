@@ -8,3 +8,4 @@ Data visualised:
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=XqCd8Bcq3yI)
 
 250ms of the data visualised in XYTime space:
+![hand_spinner_xyt_dark2_upscayl_3x_remacri](https://github.com/user-attachments/assets/cf02aa50-50c1-4acb-b621-6797d7d71fd5)
