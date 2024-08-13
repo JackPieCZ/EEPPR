@@ -6,3 +6,5 @@ Data visualised:
 - at 0.06x playback (500 fps) - [link](https://www.youtube.com/watch?v=w60AZYyNgWk)
 - at 0.03x playback (1000 fps) - [link](https://www.youtube.com/watch?v=sBFWObrqTRw)
 - at 0.006x playback (5000 fps) - [link](https://www.youtube.com/watch?v=_X_kiPSN3eA)
+
+250ms of the data visualised in XYTime space:
