@@ -5,3 +5,4 @@ Data visualised:
 - at 0.0006x playback (50000 fps) - [link](https://www.youtube.com/watch?v=aQpxOLzbDCo)
 
 250ms of the data visualised in XYTime space:
+![screen_xyt_dark2_upscayl_3x_remacri](https://github.com/user-attachments/assets/c0897771-05ce-41a8-9ae7-20d657330513)
