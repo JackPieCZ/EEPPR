@@ -1,10 +1,10 @@
-[![arXiv](https://img.shields.io/badge/arXiv-0000.00000-b31b1b.svg)](https://arxiv.org/abs/0000.00000) [![DOI:10.48550/ARXIV.0000.00000](https://zenodo.org/badge/doi/10.48550/ARXIV.0000.00000.svg)](https://doi.org/10.48550/arXiv.0000.00000)
+[![arXiv](https://img.shields.io/badge/arXiv-2408.06899-b31b1b.svg)](https://arxiv.org/abs/2408.06899) [![DOI:10.48550/ARXIV.2408.06899](https://zenodo.org/badge/doi/10.48550/ARXIV.2408.06899.svg)](https://doi.org/10.48550/arXiv.2408.06899)
 
 # EE3P3D: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation
 <!-- Kolář, J., Špetlík, R., Matas, J. (2024) EE3P3D: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation. In Proceedings of , 2024
  -->
 
-Paper Link: (soon)
+Paper Link: [arXiv](https://arxiv.org/abs/2408.06899v1)
 
 ## Dataset
 The dataset features 12 sequences of periodic phenomena (rotation - `01-06`, flicker - `07-08`, vibration - `09-10` and movement - `11-12`) with GT frequencies ranging from 3.2 up to 2000 Hz in `.raw` and `.hdf5` file formats.
@@ -132,7 +132,7 @@ After setting up your environment, you can run the EE3P3D method using the main.
 python ./method/main.py --file path/to/your/event_file.raw
 ```
 
-2. For analysing any sequence from the EE3P3D dataset simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, ect. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EE3P3D/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EE3P3D/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2).
+2. For analysing any sequence from the EE3P3D dataset simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, etc. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EE3P3D/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EE3P3D/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2).
 ```console
 python ./method/main.py -f led
 ```
@@ -221,7 +221,7 @@ If you encounter any issues during installation or running the method, please ch
 
 - `Metavision SDK Driver error 103001`: You are trying to open a file using a file path that contains some special characters ([Metavision FAQ](https://docs.prophesee.ai/stable/faq.html#why-do-i-get-errors-when-trying-to-read-recorded-files-raw-or-hdf5-with-studio-or-the-api-on-windows))
 - For other Metavision-related issues, see their [Troubleshooting guide](https://docs.prophesee.ai/stable/faq.html#troubleshooting)
-- `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver otherwise use the `--device cpu` flag when running the method
+- `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver otherwise, use the `--device cpu` flag when running the method
 - Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script
 - Ensure your CUDA installation matches the version specified by the Anaconda environment version
 
@@ -232,5 +232,13 @@ If problems persist, please open an issue with details about your setup and the 
 The code and dataset are provided under the GPL-3.0 license. Please refer to the LICENSE file for details.
 We encourage you to use them responsibly and cite the paper if you use it in your work:
 ```
-(soon)
+@misc{kol2024ee3p3d,
+    title={EE3P3D: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation},
+    author={Jakub Kolář and Radim Špetlík and Jiří Matas},
+    year={2024},
+    eprint={2408.06899},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV},
+    doi={10.48550/ARXIV.2408.06899}
+}
 ``` 
