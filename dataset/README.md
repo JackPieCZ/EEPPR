@@ -1,4 +1,4 @@
-# PPED: Periodic Phenomena Event-based Dataset
+# EE3P3D - Periodic Phenomena Event-based Dataset
 
 The dataset features 12 one-second sequences of periodic phenomena (rotation - `01-06`, flicker - `07-08`, vibration - `09-10` and movement - `11-12`) with GT frequencies ranging from 3.2Hz up to 2000Hz in file formats `.raw` and `.hdf5`.
 
