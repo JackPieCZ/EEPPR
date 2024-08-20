@@ -53,7 +53,7 @@ Tested on, but same versions (probably) not required:
    - For Windows
       - Open installation instructions for [Windows](https://docs.prophesee.ai/4.5.2/installation/windows.html#chapter-installation-windows)
       - Verify your system is compatible by checking the [Required Configuration section](https://docs.prophesee.ai/4.5.2/installation/windows.html#required-configuration)
-      - Whether you are installing the SDK for the first time or are currently using a previous version, you must download our Windows installer, which is hosted in an installer repository. The URL of this repository can be retrieved this way:
+      - Whether you are installing the SDK for the first time or are currently using a previous version, you must download a Windows installer, which is hosted in an installer repository. The URL of this repository can be retrieved this way:
          - If you are a Prophesee customer, retrieve the link in the [Knowledge Center Download section](https://support.prophesee.ai/portal/en/kb/prophesee-1/metavision-sdk/download-center). ([request an account](https://www.prophesee.ai/kc-access-request/) if you don’t have one yet).
          - Otherwise, you must [sign up for the SDK](https://www.prophesee.ai/metavision-intelligence-sdk-download) to get the link.
 
@@ -132,7 +132,7 @@ After setting up your environment, you can run the EEPPR method using the main.p
 python ./method/main.py --file path/to/your/event_file.raw
 ```
 
-2. For analysing any sequence from the EEPPR dataset simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, etc. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EEPPR/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EEPPR/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2).
+2. For analysing any sequence from the PPED dataset simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, etc. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EEPPR/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EEPPR/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2).
 ```console
 python ./method/main.py -f led
 ```
