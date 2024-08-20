@@ -1,6 +1,6 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2408.06899-b31b1b.svg)](https://arxiv.org/abs/2408.06899) [![DOI:10.48550/ARXIV.2408.06899](https://zenodo.org/badge/doi/10.48550/ARXIV.2408.06899.svg)](https://doi.org/10.48550/arXiv.2408.06899)
 
-# EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation
+# EEPPR: Event-based Estimation of Periodic Phenomena Rate using Correlation in 3D
 <!-- Kolář, J., Špetlík, R., Matas, J. (2024) EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation. In Proceedings of , 2024
  -->
 
