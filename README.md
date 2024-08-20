@@ -1,7 +1,7 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2408.06899-b31b1b.svg)](https://arxiv.org/abs/2408.06899) [![DOI:10.48550/ARXIV.2408.06899](https://zenodo.org/badge/doi/10.48550/ARXIV.2408.06899.svg)](https://doi.org/10.48550/arXiv.2408.06899)
 
-# EE3P3D: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation
-<!-- Kolář, J., Špetlík, R., Matas, J. (2024) EE3P3D: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation. In Proceedings of , 2024
+# EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation
+<!-- Kolář, J., Špetlík, R., Matas, J. (2024) EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation. In Proceedings of , 2024
  -->
 
 Paper Link: [arXiv](https://arxiv.org/abs/2408.06899v1)
@@ -70,8 +70,8 @@ Tested on, but same versions (probably) not required:
 ### Setup
 1. Clone the repository at a path that does not contain any special characters (e.g. ě, š, č, ř, ž, ý, á, í, é). Otherwise, the Metavision SDK Driver raises an exception (Error 103001):
 ```console
-git clone https://github.com/JackPieCZ/EE3P3D.git
-cd EE3P3D
+git clone https://github.com/JackPieCZ/EEPPR.git
+cd EEPPR
 ```
 
 2. Create a new Anaconda environment:
@@ -88,7 +88,7 @@ cd EE3P3D
    ```console
    conda
    ```
-   - Move to the EE3P3D directory using `cd` if you are not already there
+   - Move to the EEPPR directory using `cd` if you are not already there
    - If you have the CUDA XX.Y version installed (11.7, 12.1, 12.4), run the following command:
    ```console
    conda env create -f ./setup/environment_cudaXX_Y.yml
@@ -100,7 +100,7 @@ cd EE3P3D
 
 3. Activate the environment:
 ```console
-conda activate ee3p3d
+conda activate eeppr
 ```
 
 4. Verify the Installation:
@@ -115,7 +115,7 @@ print(f"PyTorch version: {torch.__version__}")
 print(f"CUDA is available: {torch.cuda.is_available()}")
 if not torch.cuda.is_available():
    print("CUDA is not available.")
-   print("When running the EE3P3D method, please use '--device cpu' flag.")
+   print("When running the EEPPR method, please use '--device cpu' flag.")
 
 exit()
 
@@ -125,14 +125,14 @@ python ./method/test_imports.py
 
 ### Usage
 
-After setting up your environment, you can run the EE3P3D method using the main.py script. Here are some example commands:
+After setting up your environment, you can run the EEPPR method using the main.py script. Here are some example commands:
 
 1. Basic usage with a file (`--file`/`-f`):
 ```console
 python ./method/main.py --file path/to/your/event_file.raw
 ```
 
-2. For analysing any sequence from the EE3P3D dataset simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, etc. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EE3P3D/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EE3P3D/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2).
+2. For analysing any sequence from the EEPPR dataset simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, etc. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EEPPR/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EEPPR/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2).
 ```console
 python ./method/main.py -f led
 ```
@@ -142,7 +142,7 @@ python ./method/main.py -f led
 python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300
 ```
 
-4. A simple GUI is presented to the user for verifying, selecting, modifying and replacing the RoI. If `--roi_coords` are provided (or the sequence if from the EE3P3D dataset), the GUI can be skipped by using `--skip_roi_gui`/`-srg` flag:
+4. A simple GUI is presented to the user for verifying, selecting, modifying and replacing the RoI. If `--roi_coords` are provided (or the sequence if from the EEPPR dataset), the GUI can be skipped by using `--skip_roi_gui`/`-srg` flag:
 ```console
 python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300 -srg
 ```
@@ -168,7 +168,7 @@ python ./method/main.py -f path/to/your/event_file.raw --device cuda:1
 python ./method/main.py -f path/to/your/event_file.raw --device cpu
 ```
 
-9. Logs are automatically saved into `--output_dir` (default: ./ee3p3d_out). If used with `--viz_corr_resp`, all plots are also saved here as `.jpg` files.
+9. Logs are automatically saved into `--output_dir` (default: ./eeppr_out). If used with `--viz_corr_resp`, all plots are also saved here as `.jpg` files.
 
 10. To set the level of logs printed in the console (DEBUG, INFO, WARNING, ERROR, CRITICAL), use the `--log`/`-l` flag (default: INFO). If you prefer not to use the DEBUG logging level but want to get more information on why the analysis of events within some windows did not produce any measurements, use the `--verbose`/`-v` flag.
 ```console 
@@ -183,11 +183,11 @@ python ./method/main.py -h
 usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--aggreg_t AGGREG_T] [--read_t READ_T] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE] [--event_count EVENT_COUNT] [--viz_corr_resp] [--all_results] [--device DEVICE]
                [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--verbose] [--output_dir OUTPUT_DIR]
 
-Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in an event-based sequence using the EE3P3D method.
+Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in an event-based sequence using the EEPPR method.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --file FILE, -f FILE  Filepath to the file to read events from (.raw) or name of a sequence from EE3P3D dataset: ['highcontrastline', 'velcro_front', 'velcro_side', 'highcontrastdot', 'handspinner', 'spider', 'led', 'screen', 'speaker', 'motor', 'chain_side', 'chain_top'] 
+  --file FILE, -f FILE  Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: ['highcontrastline', 'velcro_front', 'velcro_side', 'highcontrastdot', 'handspinner', 'spider', 'led', 'screen', 'speaker', 'motor', 'chain_side', 'chain_top'] 
   --roi_coords X0 Y0 X1 Y1, -rc X0 Y0 X1 Y1
                         RoI coordinates of the object to track (X0 Y0 X1 Y1)
   --aggreg_t AGGREG_T, -t AGGREG_T
@@ -212,7 +212,7 @@ optional arguments:
                         Logging level (default: INFO)
   --verbose, -v         Verbose mode
   --output_dir OUTPUT_DIR, -o OUTPUT_DIR
-                        Name of output directory (default: ./ee3p3d_out)
+                        Name of output directory (default: ./eeppr_out)
 ```
 
 ## Troubleshooting
@@ -232,8 +232,8 @@ If problems persist, please open an issue with details about your setup and the 
 The code and dataset are provided under the GPL-3.0 license. Please refer to the LICENSE file for details.
 We encourage you to use them responsibly and cite the paper if you use it in your work:
 ```
-@misc{kol2024ee3p3d,
-    title={EE3P3D: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation},
+@misc{kol2024eeppr,
+    title={EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation},
     author={Jakub Kolář and Radim Špetlík and Jiří Matas},
     year={2024},
     eprint={2408.06899},

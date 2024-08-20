@@ -163,7 +163,7 @@ cython_debug/
 /dataset/05_handspinner/*.hdf5
 /dataset/10_motor/*.raw
 /dataset/10_motor/*.hdf5
-/method/ee3p3d_out
+/method/eeppr_out
 /method/tests.py
 /method/main_all.py
-/ee3p3d_out
+/eeppr_out

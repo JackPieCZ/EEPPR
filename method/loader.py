@@ -19,9 +19,9 @@ def download_sequence(sequence_name: str, file_path: str, url_id: str) -> None:
 
 def get_sequence_path_roi(sequence_name: str) -> str:
     """
-    Get the file path for a given sequence name from EE3P3D dataset.
+    Get the file path for a given sequence name from EEPPR dataset.
     """
-    # Get the path of the EE3P3D dataset directory
+    # Get the path of the EEPPR dataset directory
     dataset_dir = os.path.join(os.path.dirname(
         os.path.dirname(__file__)), 'dataset')
 

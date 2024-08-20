@@ -2,7 +2,7 @@ import os
 import json
 import argparse
 import numpy as np
-from ee3p3d import EE3P3D
+from eeppr import EEPPR
 from datetime import datetime
 from matplotlib import pyplot as plt, use
 from utils import setup_roi, list_to_dict
@@ -13,7 +13,7 @@ from metavision_core.event_io import RawReader
 
 def main(args):
     """
-    Main function to run the EE3P3D method.
+    Main function to run the EEPPR method.
 
     Args:
         args (argparse.Namespace): Command-line arguments.
@@ -29,9 +29,9 @@ def main(args):
                    "Event count threshold must be greater than 0, reccomended 1800")
 
     logger.info(
-        f"EE3P3D method started with sequence '{args.file}', Window size: {args.win_size}px, Event count threshold: {args.event_count}, Aggregation interval: {args.aggreg_t} us, Read time: {args.read_t} us, Aggregation function: {args.aggreg_fn}")
+        f"EEPPR method started with sequence '{args.file}', Window size: {args.win_size}px, Event count threshold: {args.event_count}, Aggregation interval: {args.aggreg_t} us, Read time: {args.read_t} us, Aggregation function: {args.aggreg_fn}")
 
-    # Check if file is from EE3P3D dataset
+    # Check if file is from EEPPR dataset
     if args.file in seq_names:
         args.file, args.roi_coords = get_sequence_path_roi(args.file)
     else:
@@ -50,9 +50,9 @@ def main(args):
             raw_reader, args.roi_coords, args.win_size)
     logger.debug(f"Selected RoI: {args.roi_coords}")
 
-    # Initialize and run EE3P3D
-    ee3p3d = EE3P3D(args, run_dir, raw_reader)
-    result, freq_arr = ee3p3d.run()
+    # Initialize and run EEPPR
+    eeppr = EEPPR(args, run_dir, raw_reader)
+    result, freq_arr, corr = eeppr.run()
 
     # Log the frequency estimation for each window
     logger.info("Estimated frequency per window:")
@@ -60,11 +60,11 @@ def main(args):
         formatted_row = [
             f'{np.round(freq, args.decimals):.{args.decimals}f}' if freq > 0 else 'X' for freq in row]
         logger.info('[' + ' | '.join(f'{{:>{5 + args.decimals}}}'.format(item)
-                                        for item in formatted_row) + ']')
+                                     for item in formatted_row) + ']')
 
     logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
     if args.all_results:
-        return freq_arr
+        return result, freq_arr, corr
     else:
         return result
 
@@ -85,16 +85,16 @@ if __name__ == "__main__":
             f.close()
     except FileNotFoundError:
         logger.error(
-            f"Dataset configuration file {config_filepath} not found. Please verify you have downloaded the whole EE3P3D repository.")
+            f"Dataset configuration file {config_filepath} not found. Please verify you have downloaded the whole EEPPR repository.")
         raise FileNotFoundError(
-            f"Dataset configuration file {config_filepath} not found. Please verify you have downloaded the whole EE3P3D repository.")
+            f"Dataset configuration file {config_filepath} not found. Please verify you have downloaded the whole EEPPR repository.")
     seq_names = config_data['sequence_names']
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description='Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in an event-based sequence using the EE3P3D method.')
+        description='Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in an event-based sequence using the EEPPR method.')
     parser.add_argument('--file', '-f', required=True, type=str,
-                        help=f'Filepath to the file to read events from (.raw) or name of a sequence from EE3P3D dataset: {seq_names}')
+                        help=f'Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: {seq_names}')
     parser.add_argument('--roi_coords', '-rc', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
                         help='RoI coordinates of the object to track (X0 Y0 X1 Y1)')
     parser.add_argument('--aggreg_t', '-t', type=int, default=100,
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument('--viz_corr_resp', '-vcr', action='store_true',
                         help='Visualize correlation responses for each window')
     parser.add_argument('--all_results', '-ar', action='store_true',
-                        help='Output results from all windows')
+                        help='Output estimates from all windows (NumPy 2D array X x Y) and all correlation responses (NumPy 3D array X x Y x read_t/aggreg_t)')
     parser.add_argument('--device', '-d', type=str, default='cuda:0',
                         help='Device to run 3D correlation computations on (default: cuda:0)')
     parser.add_argument('--log', '-l', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='Verbose mode')
     parser.add_argument('--output_dir', '-o', type=str,
-                        help='Name of output directory (default: ./ee3p3d_out)', default='./ee3p3d_out')
+                        help='Name of output directory (default: ./eeppr_out)', default='./eeppr_out')
 
     args = parser.parse_args()
     run_dir = os.path.join(
