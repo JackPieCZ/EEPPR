@@ -7,7 +7,7 @@ from datetime import datetime
 from matplotlib import pyplot as plt, use
 from utils import setup_roi, list_to_dict
 from loader import get_sequence_path_roi
-from logger import setup_logger, logger, assert_and_log
+from logger import setup_logger, logger, assert_and_log, raise_and_log
 from metavision_core.event_io import RawReader
 
 
@@ -95,11 +95,9 @@ if __name__ == "__main__":
             config_data = json.load(f)
             f.close()
     except FileNotFoundError:
-        logger.error(
+        raise_and_log(
+            FileNotFoundError,
             f"Dataset configuration file {config_filepath} not found."
-            "Please verify you have downloaded the whole EEPPR repository.")
-        raise FileNotFoundError(
-            f"Dataset configuration file {config_filepath} not found. "
             "Please verify you have downloaded the whole EEPPR repository.")
     seq_names = config_data['sequence_names']
 
