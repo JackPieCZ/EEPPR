@@ -40,14 +40,21 @@ def main(args):
         assert_and_log(args.file.lower().endswith(
             '.raw'), "File must be in .raw format")
 
-    raw_reader = RawReader(args.file, max_events=int(3e7))
+    raw_reader = RawReader(args.file, max_events=int(4e7))
 
     if isinstance(args.roi_coords, list):
         args.roi_coords = list_to_dict(args.roi_coords)
+
     # Verify, modify or set new ROI coordinates
-    if args.roi_coords is None or not args.skip_roi_gui:
-        args.roi_coords = setup_roi(
-            raw_reader, args.roi_coords, args.win_size)
+    if args.roi_coords is None:
+        if args.full_resolution:
+            args.roi_coords = {'x0': 0, 'y0': 0,
+                               'x1': raw_reader.get_size()[0],
+                               'y1': raw_reader.get_size()[1]}
+
+        if not args.skip_roi_gui:
+            args.roi_coords = setup_roi(
+                raw_reader, args.roi_coords, args.win_size)
     logger.debug(f"Selected RoI: {args.roi_coords}")
 
     # Initialize and run EEPPR
@@ -97,6 +104,8 @@ if __name__ == "__main__":
                         help=f'Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: {seq_names}')
     parser.add_argument('--roi_coords', '-rc', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
                         help='RoI coordinates of the object to track (X0 Y0 X1 Y1)')
+    parser.add_argument('--full-resolution', '-fr', action='store_true',
+                        help='Flag to set ROI to full resolution of the input file')
     parser.add_argument('--aggreg_t', '-t', type=int, default=100,
                         help='Events aggregation interval in microseconds (default: 100)')
     parser.add_argument('--read_t', '-r', type=int, default=1000000,

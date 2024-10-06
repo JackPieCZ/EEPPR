@@ -104,6 +104,18 @@ def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
         update_roi_info('New RoI set.')
         fig.canvas.draw_idle()
 
+    def fullscreen_roi(_):
+        selected_roi.clear()
+        selected_roi.append({
+            'x0': 0,
+            'y0': 0,
+            'x1': width,
+            'y1': height
+        })
+        logger.info(f"Set new RoI {selected_roi[-1]}")
+        update_roi_info('New RoI set.')
+        plt.close(fig)
+
     def save(_):
         """Close the figure and save the ROI."""
         plt.close(fig)
@@ -143,13 +155,16 @@ def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
                2 - size.val//2, valstep=1, color='green')
 
     # Create buttons
-    ax_reset = fig.add_axes([0.35, 0.05, 0.1, 0.075])
-    ax_addroi = fig.add_axes([0.46, 0.05, 0.1, 0.075])
-    ax_save = fig.add_axes([0.57, 0.05, 0.1, 0.075])
+    ax_reset = fig.add_axes([0.29, 0.05, 0.1, 0.075])
+    ax_addroi = fig.add_axes([0.4, 0.05, 0.1, 0.075])
+    ax_save = fig.add_axes([0.51, 0.05, 0.1, 0.075])
+    ax_fullscreen = fig.add_axes([0.62, 0.05, 0.1, 0.075])
 
     save_button = Button(ax_save, 'Confirm & Exit')
     reset_button = Button(ax_reset, 'Reset to default')
     addroi_button = Button(ax_addroi, 'Set RoI')
+    fullscreen_button = Button(
+        ax_fullscreen, "Analyse full\nresolution instead")
 
     # Setup initial square
     pending_roi = plt.Rectangle((x.val, y.val), size.val, size.val,
@@ -163,7 +178,8 @@ def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
         ax[0].add_patch(current_roi)
         selected_roi.append(roi)
         draw_windows(roi['x0'], roi['y0'], roi['x1'] - roi['x0'], win_size)
-        update_roi_info('Confirm the RoI or use sliders to modify it, then press Set RoI.\n')
+        update_roi_info(
+            'Confirm the RoI or use sliders to modify it, then press Set RoI.\n')
     else:
         draw_windows(x.val, y.val, size.val, win_size)
         update_roi_info('Use sliders to select a RoI, then press Set RoI.')
@@ -178,8 +194,10 @@ def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
     reset_button.on_clicked(reset)
     save_button.on_clicked(save)
     addroi_button.on_clicked(add_roi)
+    fullscreen_button.on_clicked(fullscreen_roi)
 
     plt.show()
+    raw_reader.reset()
     return selected_roi[0]
 
 
@@ -200,7 +218,7 @@ def list_to_dict(coords: list) -> dict:
     return {'x0': x0, 'y0': y0, 'x1': x1, 'y1': y1}
 
 
-def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict: dict) -> sparse.COO:
+def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict: dict, reset_reader=True) -> sparse.COO:
     """
     Load events from the video file within the specified ROI.
 
@@ -213,8 +231,9 @@ def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict
         sparse.COO: Sparse array of events.
     """
     assert_and_log(os.path.exists(video_path), f"File {video_path} not found")
-    # Reset the reader to the beginning of the video
-    raw_reader.reset()
+    if reset_reader:
+        # Reset the reader to the beginning of the video
+        raw_reader.reset()
     # Load events for the specified duration
     events = raw_reader.load_delta_t(microseconds_to_read)
     # Normalize event timestamps to start from zero
@@ -257,7 +276,7 @@ def quantize_events(video_path: str, microseconds_to_analyze: int, roi_dict: dic
     num_intervals = int(microseconds_to_analyze / aggreg_t)
 
     quantized_events = np.zeros(shape=(
-        num_intervals, end_y - start_y + 1, end_x - start_x + 1), dtype=np.float16)
+        num_intervals, end_y - start_y + 1, end_x - start_x + 1), dtype=np.int8)
 
     ev_it = EventsIterator(video_path, delta_t=aggreg_t,
                            max_duration=microseconds_to_analyze)
