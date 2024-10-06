@@ -33,5 +33,5 @@ def assert_and_log(condition, message):
 
 
 def raise_and_log(exception, message):
-    logger.error(f"Assertion failed: {message}")
+    logger.error(f"{exception.__name__}: {message}")
     raise exception(message)
