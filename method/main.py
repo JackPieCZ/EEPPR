@@ -20,7 +20,8 @@ def main(args):
     """
     setup_logger(run_dir, args.log)
     assert_and_log(0 < args.aggreg_t < args.read_t,
-                   "Aggregation interval must be greater than 0 and less than read_t, reccomended 100")
+                   "Aggregation interval must be greater than 0 and less than read_t, "
+                   "reccomended 100")
     assert_and_log(args.aggreg_t < args.read_t,
                    "Read time must be greater than aggreg_t, reccomended 1000000")
     assert_and_log(args.win_size > 0,
@@ -29,7 +30,12 @@ def main(args):
                    "Event count threshold must be greater than 0, reccomended 1800")
 
     logger.info(
-        f"EEPPR method started with sequence '{args.file}', Window size: {args.win_size}px, Event count threshold: {args.event_count}, Aggregation interval: {args.aggreg_t} us, Read time: {args.read_t} us, Aggregation function: {args.aggreg_fn}")
+        f"EEPPR method started with sequence '{args.file}',"
+        "Window size: {args.win_size}px, "
+        "Event count threshold: {args.event_count}, "
+        "Aggregation interval: {args.aggreg_t} us, "
+        "Read time: {args.read_t} us, "
+        "Aggregation function: {args.aggreg_fn}")
 
     # Check if file is from EEPPR dataset
     if args.file in seq_names:
@@ -37,8 +43,8 @@ def main(args):
     else:
         assert_and_log(os.path.exists(args.file),
                        f"File {args.file} not found")
-        assert_and_log(args.file.lower().endswith(
-            '.raw'), "File must be in .raw format")
+        assert_and_log(args.file.lower().endswith('.raw'),
+                       "File must be in .raw format")
 
     raw_reader = RawReader(args.file, max_events=int(4e7))
 
@@ -46,15 +52,12 @@ def main(args):
         args.roi_coords = list_to_dict(args.roi_coords)
 
     # Verify, modify or set new ROI coordinates
-    if args.roi_coords is None:
-        if args.full_resolution:
-            args.roi_coords = {'x0': 0, 'y0': 0,
-                               'x1': raw_reader.get_size()[0],
-                               'y1': raw_reader.get_size()[1]}
-
-        if not args.skip_roi_gui:
-            args.roi_coords = setup_roi(
-                raw_reader, args.roi_coords, args.win_size)
+    if args.full_resolution:
+        args.roi_coords = {'x0': 0, 'y0': 0,
+                           'x1': raw_reader.get_size()[0],
+                           'y1': raw_reader.get_size()[1]}
+    if args.roi_coords is None and not args.skip_roi_gui:
+        args.roi_coords = setup_roi(raw_reader, args.roi_coords, args.win_size)
     logger.debug(f"Selected RoI: {args.roi_coords}")
 
     # Initialize and run EEPPR
@@ -65,7 +68,8 @@ def main(args):
     logger.info("Estimated frequency per window:")
     for row in freq_arr:
         formatted_row = [
-            f'{np.round(freq, args.decimals):.{args.decimals}f}' if freq > 0 else 'X' for freq in row]
+            f'{np.round(freq, args.decimals):.{args.decimals}f}'
+            if freq > 0 else 'X' for freq in row]
         logger.info('[' + ' | '.join(f'{{:>{5 + args.decimals}}}'.format(item)
                                      for item in formatted_row) + ']')
 
@@ -92,14 +96,17 @@ if __name__ == "__main__":
             f.close()
     except FileNotFoundError:
         logger.error(
-            f"Dataset configuration file {config_filepath} not found. Please verify you have downloaded the whole EEPPR repository.")
+            f"Dataset configuration file {config_filepath} not found."
+            "Please verify you have downloaded the whole EEPPR repository.")
         raise FileNotFoundError(
-            f"Dataset configuration file {config_filepath} not found. Please verify you have downloaded the whole EEPPR repository.")
+            f"Dataset configuration file {config_filepath} not found. "
+            "Please verify you have downloaded the whole EEPPR repository.")
     seq_names = config_data['sequence_names']
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description='Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in an event-based sequence using the EEPPR method.')
+        description='Measure the frequency of periodic phenomena '
+        '(rotation, vibration, flicker, etc.) in an event-based sequence using the EEPPR method.')
     parser.add_argument('--file', '-f', required=True, type=str,
                         help=f'Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: {seq_names}')
     parser.add_argument('--roi_coords', '-rc', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
