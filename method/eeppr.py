@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 from tqdm.auto import tqdm
 from matplotlib import ticker
 from torch.nn import functional as F
-from torch.nn import Unfold
 from scipy.optimize import fminbound
 from scipy.signal import find_peaks
 from utils import load_events, quantize_events, find_template_depth
@@ -50,16 +49,15 @@ class EEPPR:
         main_pbar = tqdm(total=5, desc='Running EEPPR method', leave=False,
                          bar_format="{l_bar}|{bar}| {n_fmt}/{total_fmt}{postfix}")
         # Load events from input file
-        # if self.verbose:
         main_pbar.set_description('Loading events...')
         logger.debug(
             f'Loading events from input file: {self.input_file_path=}, {self.read_t=}, {self.roi_coords=}')
         sparse_ev_arr = load_events(
             self.input_file_path, self.reader, self.read_t, self.roi_coords)
+        if sparse_ev_arr is None:
+            main_pbar.close()
+            return None, None, None
         main_pbar.update(1)
-
-        # Delete the reader to free up memory
-        del self.reader
 
         # Quantize events and convert to torch tensor
         main_pbar.set_description('Quantizing events...')
@@ -99,12 +97,6 @@ class EEPPR:
         # Delete the sparse array and partitioned events tensor to free up memory
         del sparse_ev_arr, partitioned_events
 
-        # If no estimations are found, double the aggreg_t value and run again
-        if estim_freq_arr is None:
-            logger.debug(f'No estimations found. Doubling the aggregation time to {self.aggreg_t * 2} us')
-            self.aggreg_t *= 2
-            return self.run()
-
         # Apply the aggregation function to aggregate the estimations from all windows
         main_pbar.set_description('Aggregating results...')
         aggreg_fn = getattr(np, self.aggreg_fn.lower())
@@ -115,7 +107,7 @@ class EEPPR:
 
         return result, estim_freq_arr, corr_out
 
-    def unfold(input_tensor, kernel_size, stride=1, padding=0, dilation=1):
+    def unfold(self, input_tensor, kernel_size, stride=1, padding=0, dilation=1):
         """
         Re-implementation of the torch.nn.Unfold function as the original only supports torch.float16/32 input tensors.
 
@@ -243,14 +235,6 @@ class EEPPR:
             corr_out = corr_out.detach().cpu().numpy()
             corr_arr[x_win, y_win, :corr_out.size] = corr_out
 
-            # Calculate the derivative of the correlation output
-            max_derivative = np.max(np.abs(np.diff(corr_out)))
-
-            # Skip if the maximum derivative is too high
-            logger.debug(f'Max derivative: {max_derivative}')
-            if max_derivative > 3900:
-                return None, None
-
             # Find periodic peaks in the correlation output
             peaks = self.find_periodic_peaks(corr_out)
             period_timemarks = np.multiply(peaks, self.aggreg_t).flatten()
@@ -376,5 +360,5 @@ class EEPPR:
 
         if self.viz_corr_resp:
             plt.savefig(os.path.join(
-                self.run_dir, f'corr_resps_win-{self.win_coords[0]}-{self.win_coords[1]}.pdf'))
+                self.run_dir, f'corr_resps_win-{self.win_coords[0]}-{self.win_coords[1]}.jpg'))
         plt.close('all')

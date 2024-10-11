@@ -218,7 +218,7 @@ def list_to_dict(coords: list) -> dict:
     return {'x0': x0, 'y0': y0, 'x1': x1, 'y1': y1}
 
 
-def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict: dict, reset_reader=True) -> sparse.COO:
+def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict: dict, reset_reader=False) -> sparse.COO:
     """
     Load events from the video file within the specified ROI.
 
@@ -236,6 +236,9 @@ def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict
         raw_reader.reset()
     # Load events for the specified duration
     events = raw_reader.load_delta_t(microseconds_to_read)
+    if events.size == 0:
+        logger.info(f"EOF reached or no events found in the video file {video_path}")
+        return None
     # Normalize event timestamps to start from zero
     events['t'] -= events['t'].min()
 
@@ -304,7 +307,7 @@ def quantize_events(video_path: str, microseconds_to_analyze: int, roi_dict: dic
 
 def find_template_depth(sparse_win_arr: sparse.COO, template_event_count: int, read_t: int, aggreg_t: int) -> int:
     """
-    Find the appropriate depth for the template.
+    Find the appropriate depth for the template using binary search.
 
     Args:
         sparse_win_arr (sparse.COO): Sparse array of events in the window.

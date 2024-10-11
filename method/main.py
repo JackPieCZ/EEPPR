@@ -11,6 +11,62 @@ from logger import setup_logger, logger, assert_and_log, raise_and_log
 from metavision_core.event_io import RawReader
 
 
+def parse_arguments():
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description='Measure the frequency of periodic phenomena '
+        '(rotation, vibration, flicker, etc.) in an event-based sequence using the EEPPR method.')
+    parser.add_argument('--file', '-f', required=True, type=str,
+                        help=f'Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: {seq_names}')
+    parser.add_argument('--roi_coords', '-rc', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
+                        help='RoI coordinates of the object to track (X0 Y0 X1 Y1)')
+    parser.add_argument('--full-resolution', '-fr', action='store_true',
+                        help='Flag to set ROI to full resolution of the input file')
+    parser.add_argument('--aggreg_t', '-t', type=int, default=100,
+                        help='Events aggregation interval in microseconds (default: 100)')
+    parser.add_argument('--read_t', '-r', type=int, default=1000000,
+                        help='Number of microseconds to read events from the file (default: 1000000)')
+    parser.add_argument('--full_seq_analysis', '-fsa', action='store_true',
+                        help='Analyze the whole sequence at the step length of --read_t microseconds, updating the template every step (default: False)')
+    parser.add_argument('--aggreg_fn', '-afn', type=str, default='median', choices=['mean', 'median', 'max', 'min'],
+                        help='Name of a NumPy function used to aggregate measurements from all windows (default: median)')
+    parser.add_argument('--decimals', '-dp', type=int, default=1,
+                        help='Number of decimal places to round the result to (default: 1)')
+    parser.add_argument('--skip_roi_gui', '-srg', action='store_true',
+                        help='Flag to skip the RoI setup GUI if --roi_coords are provided')
+    parser.add_argument('--win_size', '-w', type=int, default=45,
+                        help='Window size in pixels (default: 45, recommended not to change, see our paper)')
+    parser.add_argument('--event_count', '-N', type=int, default=1800,
+                        help='The threshold for template event count (default: 1800, recommended not to change, see our paper)')
+    parser.add_argument('--viz_corr_resp', '-vcr', action='store_true',
+                        help='Visualize correlation responses for each window')
+    parser.add_argument('--all_results', '-ar', action='store_true',
+                        help='Output estimates from all windows (NumPy 2D array X x Y) and all correlation responses (NumPy 3D array X x Y x read_t/aggreg_t)')
+    parser.add_argument('--device', '-d', type=str, default='cuda:0',
+                        help='Device to run 3D correlation computations on (default: cuda:0)')
+    parser.add_argument('--log', '-l', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help='Logging level (default: INFO)')
+    parser.add_argument('--verbose', '-v', action='store_true',
+                        help='Verbose mode')
+    parser.add_argument('--output_dir', '-o', type=str,
+                        help='Name of output directory (default: ./eeppr_out)', default='./eeppr_out')
+
+    return parser.parse_args()
+
+
+def log_results(result, freq_arr):
+    # Log the frequency estimation for each window
+    logger.info("Estimated frequency per window:")
+    for row in freq_arr:
+        formatted_row = [
+            f'{np.round(freq, args.decimals):.{args.decimals}f}'
+            if freq > 0 else 'X' for freq in row]
+        logger.info('[' + ' | '.join(f'{{:>{5 + args.decimals}}}'.format(item)
+                                     for item in formatted_row) + ']')
+
+    logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
+
+
 def main(args):
     """
     Main function to run the EEPPR method.
@@ -30,12 +86,12 @@ def main(args):
                    "Event count threshold must be greater than 0, reccomended 1800")
 
     logger.info(
-        f"EEPPR method started with sequence '{args.file}',"
-        "Window size: {args.win_size}px, "
-        "Event count threshold: {args.event_count}, "
-        "Aggregation interval: {args.aggreg_t} us, "
-        "Read time: {args.read_t} us, "
-        "Aggregation function: {args.aggreg_fn}")
+        f"EEPPR method started with sequence '{args.file}', "
+        f"{f'Full sequence analysis with step length {args.read_t} us' if args.full_seq_analysis else f'Partial sequence analysis of length {args.read_t} us'}, "
+        f"Window size: {args.win_size}px, "
+        f"Event count template threshold: {args.event_count}, "
+        f"Aggregation interval: {args.aggreg_t} us, "
+        f"Aggregation function: {args.aggreg_fn}")
 
     # Check if file is from EEPPR dataset
     if args.file in seq_names:
@@ -62,22 +118,48 @@ def main(args):
 
     # Initialize and run EEPPR
     eeppr = EEPPR(args, run_dir, raw_reader)
-    result, freq_arr, corr = eeppr.run()
 
-    # Log the frequency estimation for each window
-    logger.info("Estimated frequency per window:")
-    for row in freq_arr:
-        formatted_row = [
-            f'{np.round(freq, args.decimals):.{args.decimals}f}'
-            if freq > 0 else 'X' for freq in row]
-        logger.info('[' + ' | '.join(f'{{:>{5 + args.decimals}}}'.format(item)
-                                     for item in formatted_row) + ']')
+    if args.full_seq_analysis:
+        results = []
+        freq_arrs = []
+        corr_arrs = []
 
-    logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
-    if args.all_results:
-        return result, freq_arr, corr
+        while True:
+            # Run EEPPR analysis for each time segment
+            result, freq_arr, corr_arr = eeppr.run()
+
+            # Break the loop if no more data is available
+            if result is None or freq_arr is None or corr_arr is None:
+                break
+
+            # Append results to respective lists
+            results.append(result)
+            freq_arrs.append(freq_arr)
+            corr_arrs.append(corr_arr)
+
+            # Log the results for the current segment
+            log_results(result, freq_arr)
+
+        # Convert lists to numpy arrays
+        results = np.array(results)
+        freq_arrs = np.stack(freq_arrs)
+        corr_arrs = np.concatenate(corr_arrs, axis=2)
+        if args.all_results:
+            return results, freq_arrs, corr_arrs
+        else:
+            return results
     else:
-        return result
+        # Run EEPPR analysis for a single time segment
+        result, freq_arr, corr_arr = eeppr.run()
+        if result is None or freq_arr is None or corr_arr is None:
+            return None
+        # Log the results
+        log_results(result, freq_arr)
+
+        if args.all_results:
+            return result, freq_arr, corr_arr
+        else:
+            return result
 
 
 if __name__ == "__main__":
@@ -101,44 +183,7 @@ if __name__ == "__main__":
             "Please verify you have downloaded the whole EEPPR repository.")
     seq_names = config_data['sequence_names']
 
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(
-        description='Measure the frequency of periodic phenomena '
-        '(rotation, vibration, flicker, etc.) in an event-based sequence using the EEPPR method.')
-    parser.add_argument('--file', '-f', required=True, type=str,
-                        help=f'Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: {seq_names}')
-    parser.add_argument('--roi_coords', '-rc', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
-                        help='RoI coordinates of the object to track (X0 Y0 X1 Y1)')
-    parser.add_argument('--full-resolution', '-fr', action='store_true',
-                        help='Flag to set ROI to full resolution of the input file')
-    parser.add_argument('--aggreg_t', '-t', type=int, default=100,
-                        help='Events aggregation interval in microseconds (default: 100)')
-    parser.add_argument('--read_t', '-r', type=int, default=1000000,
-                        help='Number of microseconds to read events from the file (default: 1000000)')
-    parser.add_argument('--aggreg_fn', '-afn', type=str, default='median', choices=['mean', 'median', 'max', 'min'],
-                        help='Name of a NumPy function used to aggregate measurements from all windows (default: median)')
-    parser.add_argument('--decimals', '-dp', type=int, default=1,
-                        help='Number of decimal places to round the result to (default: 1)')
-    parser.add_argument('--skip_roi_gui', '-srg', action='store_true',
-                        help='Flag to skip the RoI setup GUI if --roi_coords are provided')
-    parser.add_argument('--win_size', '-w', type=int, default=45,
-                        help='Window size in pixels (default: 45, recommended not to change, see our paper)')
-    parser.add_argument('--event_count', '-N', type=int, default=1800,
-                        help='Threshold for template event count (default: 1800, recommended not to change, see our paper)')
-    parser.add_argument('--viz_corr_resp', '-vcr', action='store_true',
-                        help='Visualize correlation responses for each window')
-    parser.add_argument('--all_results', '-ar', action='store_true',
-                        help='Output estimates from all windows (NumPy 2D array X x Y) and all correlation responses (NumPy 3D array X x Y x read_t/aggreg_t)')
-    parser.add_argument('--device', '-d', type=str, default='cuda:0',
-                        help='Device to run 3D correlation computations on (default: cuda:0)')
-    parser.add_argument('--log', '-l', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        help='Logging level (default: INFO)')
-    parser.add_argument('--verbose', '-v', action='store_true',
-                        help='Verbose mode')
-    parser.add_argument('--output_dir', '-o', type=str,
-                        help='Name of output directory (default: ./eeppr_out)', default='./eeppr_out')
-
-    args = parser.parse_args()
+    args = parse_arguments()
     run_dir = os.path.join(
         args.output_dir, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
     os.makedirs(run_dir, exist_ok=True)
