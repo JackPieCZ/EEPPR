@@ -137,7 +137,7 @@ python ./method/main.py --file path/to/your/event_file.raw
 python ./method/main.py -f led
 ```
 
-3. Specifying RoI coordinates (optional, `--roi_coords`/`-rc`) in `X0 Y0 X1 Y1` format. RoI for sequences from the dataset are provided automatically. If the coordinates are not provided, a GUI will be shown where the user can set RoI easily.
+3. Specifying RoI coordinates (optional, `--roi_coords`/`-rc`) in `X0 Y0 X1 Y1` format. RoI for sequences from the dataset are provided automatically. If you want to analyse the full sensor spatial resolution, use the `--full-resolution`/`-fr` flag. If none of those flags are provided, a GUI will be shown where the user can set RoI easily.
 ```console
 python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300
 ```

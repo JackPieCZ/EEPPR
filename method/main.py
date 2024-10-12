@@ -20,12 +20,12 @@ def parse_arguments():
                         help=f'Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: {seq_names}')
     parser.add_argument('--roi_coords', '-rc', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
                         help='RoI coordinates of the object to track (X0 Y0 X1 Y1)')
-    parser.add_argument('--full-resolution', '-fr', action='store_true',
+    parser.add_argument('--full_resolution', '-fr', action='store_true',
                         help='Flag to set ROI to full resolution of the input file')
     parser.add_argument('--aggreg_t', '-t', type=int, default=100,
                         help='Events aggregation interval in microseconds (default: 100)')
-    parser.add_argument('--read_t', '-r', type=int, default=1000000,
-                        help='Number of microseconds to read events from the file (default: 1000000)')
+    parser.add_argument('--read_t', '-r', type=int,
+                        help='Number of microseconds to read events from the file')
     parser.add_argument('--full_seq_analysis', '-fsa', action='store_true',
                         help='Analyze the whole sequence at the step length of --read_t microseconds, updating the template every step (default: False)')
     parser.add_argument('--aggreg_fn', '-afn', type=str, default='median', choices=['mean', 'median', 'max', 'min'],
@@ -51,20 +51,30 @@ def parse_arguments():
     parser.add_argument('--output_dir', '-o', type=str,
                         help='Name of output directory (default: ./eeppr_out)', default='./eeppr_out')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.read_t is None:
+        if args.file in seq_names and not args.roi_coords:
+            args.read_t = 1000000
+        if args.full_resolution:
+            args.read_t = 250000
+        else:
+            args.read_t = 500000
+
+    return args
 
 
-def log_results(result, freq_arr):
-    # Log the frequency estimation for each window
-    logger.info("Estimated frequency per window:")
-    for row in freq_arr:
-        formatted_row = [
-            f'{np.round(freq, args.decimals):.{args.decimals}f}'
-            if freq > 0 else 'X' for freq in row]
-        logger.info('[' + ' | '.join(f'{{:>{5 + args.decimals}}}'.format(item)
-                                     for item in formatted_row) + ']')
+def log_results(result, freq_arr, full=True, prefix=''):
+    if full:
+        # Log the frequency estimation for each window
+        logger.info("Estimated frequency per window:")
+        for row in freq_arr:
+            formatted_row = [
+                f'{np.round(freq, args.decimals):.{args.decimals}f}'
+                if freq > 0 else 'X' for freq in row]
+            logger.info('[' + ' | '.join(f'{{:>{5 + args.decimals}}}'.format(item)
+                                         for item in formatted_row) + ']')
 
-    logger.info(f"Estimated {args.aggreg_fn} frequency: {result} Hz")
+    logger.info(f"{prefix}Estimated {args.aggreg_fn} frequency: {result} Hz")
 
 
 def main(args):
@@ -123,7 +133,7 @@ def main(args):
         results = []
         freq_arrs = []
         corr_arrs = []
-
+        i_step = 0
         while True:
             # Run EEPPR analysis for each time segment
             result, freq_arr, corr_arr = eeppr.run()
@@ -138,7 +148,9 @@ def main(args):
             corr_arrs.append(corr_arr)
 
             # Log the results for the current segment
-            log_results(result, freq_arr)
+            log_results(result, freq_arr,
+                        prefix=f'Sequence step {i_step * args.read_t}--{(i_step + 1) * args.read_t}us: ')
+            i_step += 1
 
         # Convert lists to numpy arrays
         results = np.array(results)
