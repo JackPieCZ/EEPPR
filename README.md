@@ -123,7 +123,7 @@ python ./method/test_imports.py
 
 ```
 
-### Usage
+### Usage examples
 
 After setting up your environment, you can run the EEPPR method using the main.py script. Here are some example commands:
 
@@ -132,7 +132,7 @@ After setting up your environment, you can run the EEPPR method using the main.p
 python ./method/main.py --file path/to/your/event_file.raw
 ```
 
-2. For analysing any sequence from the PPED dataset simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, etc. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EEPPR/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EEPPR/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2).
+2. To analyse any sequence from the PPED dataset, simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, etc. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EEPPR/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EEPPR/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2).
 ```console
 python ./method/main.py -f led
 ```
@@ -142,70 +142,100 @@ python ./method/main.py -f led
 python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300
 ```
 
-4. A simple GUI is presented to the user for verifying, selecting, modifying and replacing the RoI. If `--roi_coords` are provided (or the sequence if from the EEPPR dataset), the GUI can be skipped by using `--skip_roi_gui`/`-srg` flag:
+4. A simple GUI is presented to the user for verifying, selecting, modifying and replacing the RoI. If `--roi_coords` are provided (or the sequence if from the EEPPR dataset), the GUI can be skipped by using the `--skip_roi_gui`/`-srg` flag:
+```console
+python ./method/main.py -f path/to/your/event_file.raw --read_t 500000 -srg
+```
+
+
+5. By default, the method loads and analyses the first second of the given sequence data. To analyse the entire sequence at a step length equal to `--read_t` microseconds, use the `--full_seq_analysis`/`-fsa` flag. It is important to mention that in this use case, the `--read_t` parameter sets the update frequency in microseconds of the correlation template.
 ```console
 python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300 -srg
 ```
+The method's output will be a 1D `numpy.ndarray` of `float64` measurements of a length equal to the number of steps (the sequence length divided by `--read_t`).
 
-5. Using a different aggregation function (`mean`, `median`, `max`, `min` or other NumPy functions) for aggregating measurements from all windows (optional, `--aggreg_fn`/`-afn`). By default, `median` is used.
+6. Using a different aggregation function (`mean`, `median`, `max`, `min` or other NumPy functions) for aggregating measurements from all windows (optional, `--aggreg_fn`/`-afn`). By default, `median` is used.
 ```console
 python ./method/main.py -f path/to/your/event_file.raw --aggreg_fn mean
 ```
 
-6. If you instead prefer to obtain measurements from all windows, you can make the method output the whole NumPy array of measured frequencies using the optional flag `--all_results` or `-ar`:
+7. If you instead prefer to obtain measurements from all windows and all correlation responses for further analysis, use the optional flag `--all_results` or `-ar`:
 ```console
 python ./method/main.py -f motor -ar
 ```
+Using this flag, the method outputs three objects:
+- A `numpy.float64` value representing the method's output
+- A 2D `numpy.ndarray` of `float64` measurements from all windows of shape (`x_windows`, `y_windows`)
+- A 3D `numpy.ndarray` of `float64` correlation responses for each window of shape (`x_windows`, `y_windows`, `depths_count`)
 
-7. Visualize correlation responses and their peaks for each window in an interactive plot (optional, `--viz_corr_resp`/`-vcr`):
+where
+- `x_windows` is the number of windows horizontally (see method's diagram above)
+- `y_windows` is the number of windows vertically
+- `depths_count` is equal to `--read_t` divided by `--aggreg_t`
+
+If the `--all_results` flag is used with the `--full_seq_analysis` flag, the method outputs following three objects:
+- A 1D `numpy.ndarray` of `float64` values representing the method's output of shape (`steps`,)
+- A 3D `numpy.ndarray` of `float64` measurements from all windows of shape (`n_steps`, `x_windows`, `y_windows`)
+- A 3D `numpy.ndarray` of `float64` correlation responses for each window of shape (`x_windows`, `y_windows`, `seq_len`)
+
+where 
+- `n_steps` is equal to the sequence length divided by `--read_t`
+- `seq_len` is equal to the sequence length divided by `--aggreg_t`
+
+8. Visualise correlation responses and their peaks for each window in an interactive plot (optional, `--viz_corr_resp`/`-vcr`):
 ```console 
 python ./method/main.py -f handspinner -vcr
 ```
 
-8. Run 3D correlation computations on a specific device (optional, `--device`/`-d`, default is `cuda:0`):
+9. Run 3D correlation computations on a specific device (optional, `--device`/`-d`, default is `cuda:0`):
 ```console
 python ./method/main.py -f path/to/your/event_file.raw --device cuda:1
 python ./method/main.py -f path/to/your/event_file.raw --device cpu
 ```
 
-9. Logs are automatically saved into `--output_dir` (default: ./eeppr_out). If used with `--viz_corr_resp`, all plots are also saved here as `.jpg` files.
+10. Logs are automatically saved into `--output_dir` (default: ./eeppr_out). If used with `--viz_corr_resp`, all plots of correlation responses are also saved here as `.jpg` files.
 
-10. To set the level of logs printed in the console (DEBUG, INFO, WARNING, ERROR, CRITICAL), use the `--log`/`-l` flag (default: INFO). If you prefer not to use the DEBUG logging level but want to get more information on why the analysis of events within some windows did not produce any measurements, use the `--verbose`/`-v` flag.
+11. To set the level of logs printed in the console (DEBUG, INFO, WARNING, ERROR, CRITICAL), use the `--log`/`-l` flag (default: INFO). If you prefer not to use the DEBUG logging level but want to get more information on why the analysis of events within some windows did not produce any measurements, use the `--verbose`/`-v` flag.
 ```console 
 python ./method/main.py -f handspinner -v
 ```
 
-For a full list of available options, run:
+For a complete list of available options, run:
 ```console
 python ./method/main.py -h 
 ```
 ```
-usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--aggreg_t AGGREG_T] [--read_t READ_T] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE] [--event_count EVENT_COUNT] [--viz_corr_resp] [--all_results] [--device DEVICE]
-               [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--verbose] [--output_dir OUTPUT_DIR]
+usage: main.py [-h] --file FILE [--roi_coords X0 Y0 X1 Y1] [--full-resolution] [--aggreg_t AGGREG_T] [--read_t READ_T] [--full_seq_analysis] [--aggreg_fn {mean,median,max,min}] [--decimals DECIMALS] [--skip_roi_gui] [--win_size WIN_SIZE]
+               [--event_count EVENT_COUNT] [--viz_corr_resp] [--all_results] [--device DEVICE] [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--verbose] [--output_dir OUTPUT_DIR]
 
 Measure the frequency of periodic phenomena (rotation, vibration, flicker, etc.) in an event-based sequence using the EEPPR method.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --file FILE, -f FILE  Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: ['highcontrastline', 'velcro_front', 'velcro_side', 'highcontrastdot', 'handspinner', 'spider', 'led', 'screen', 'speaker', 'motor', 'chain_side', 'chain_top'] 
+  --file FILE, -f FILE  Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: ['highcontrastline', 'velcro_front', 'velcro_side', 'highcontrastdot', 'handspinner', 'spider', 'led', 'screen', 'speaker', 'motor', 'chain_side',   
+                        'chain_top']
   --roi_coords X0 Y0 X1 Y1, -rc X0 Y0 X1 Y1
                         RoI coordinates of the object to track (X0 Y0 X1 Y1)
+  --full-resolution, -fr
+                        Flag to set ROI to full resolution of the input file
   --aggreg_t AGGREG_T, -t AGGREG_T
                         Events aggregation interval in microseconds (default: 100)
   --read_t READ_T, -r READ_T
                         Number of microseconds to read events from the file (default: 1000000)
+  --full_seq_analysis, -fsa
+                        Analyze the whole sequence at the step length of --read_t microseconds, updating the template every step (default: False)
   --aggreg_fn {mean,median,max,min}, -afn {mean,median,max,min}
                         Name of a NumPy function used to aggregate measurements from all windows (default: median)
   --decimals DECIMALS, -dp DECIMALS
                         Number of decimal places to round the result to (default: 1)
   --skip_roi_gui, -srg  Flag to skip the RoI setup GUI if --roi_coords are provided
   --win_size WIN_SIZE, -w WIN_SIZE
-                        Window size in pixels (default: 45, recommended not to change, see our paper)
+                        Window size in pixels (default: 45, recommended not to change. See our paper)
   --event_count EVENT_COUNT, -N EVENT_COUNT
-                        Threshold for template event count (default: 1800, recommended not to change, see our paper)
+                        The threshold for template event count (default: 1800, recommended not to change. See our paper)
   --viz_corr_resp, -vcr
                         Visualize correlation responses for each window
-  --all_results, -ar    Output results from all windows
+  --all_results, -ar    Output estimates from all windows (NumPy 2D array X x Y) and all correlation responses (NumPy 3D array X x Y x read_t/aggreg_t)
   --device DEVICE, -d DEVICE
                         Device to run 3D correlation computations on (default: cuda:0)
   --log {DEBUG,INFO,WARNING,ERROR,CRITICAL}, -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}
@@ -221,7 +251,7 @@ If you encounter any issues during installation or running the method, please ch
 
 - `Metavision SDK Driver error 103001`: You are trying to open a file using a file path that contains some special characters ([Metavision FAQ](https://docs.prophesee.ai/stable/faq.html#why-do-i-get-errors-when-trying-to-read-recorded-files-raw-or-hdf5-with-studio-or-the-api-on-windows))
 - For other Metavision-related issues, see their [Troubleshooting guide](https://docs.prophesee.ai/stable/faq.html#troubleshooting)
-- `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver otherwise, use the `--device cpu` flag when running the method
+- `RuntimeError: Found no NVIDIA driver on your system`: If you have NVIDIA GPU, check that you have updated its driver; otherwise, use the `--device cpu` flag when running the method
 - Make sure all prerequisites are correctly installed by running the `method/test_imports.py` script
 - Ensure your CUDA installation matches the version specified by the Anaconda environment version
 
@@ -232,13 +262,14 @@ If problems persist, please open an issue with details about your setup and the 
 The code and dataset are provided under the GPL-3.0 license. Please refer to the LICENSE file for details.
 We encourage you to use them responsibly and cite the paper if you use it in your work:
 ```
-@misc{kol2024eeppr,
+@article{kol2024eeppr,
     title={EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation},
     author={Jakub Kolář and Radim Špetlík and Jiří Matas},
     year={2024},
+    month=aug,
     eprint={2408.06899},
     archivePrefix={arXiv},
     primaryClass={cs.CV},
     doi={10.48550/ARXIV.2408.06899}
 }
-``` 
+```
