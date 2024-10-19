@@ -144,7 +144,7 @@ python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300
 
 4. A simple GUI is presented to the user for verifying, selecting, modifying and replacing the RoI. If `--roi_coords` are provided (or the sequence if from the EEPPR dataset), the GUI can be skipped by using the `--skip_roi_gui`/`-srg` flag:
 ```console
-python ./method/main.py -f path/to/your/event_file.raw --read_t 500000 -srg
+python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300 -srg
 ```
 
 
