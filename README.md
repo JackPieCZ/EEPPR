@@ -132,12 +132,12 @@ After setting up your environment, you can run the EEPPR method using the main.p
 python ./method/main.py --file path/to/your/event_file.raw
 ```
 
-2. To analyse any sequence from the PPED dataset, simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, etc. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EEPPR/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EEPPR/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2).
+2. To analyse any sequence from the PPED dataset, simply enter the sequence name. For example, `led`, `highcontrastdot`, `screen`, `motor`, etc. For all sequence names, check the `dataset` [folder](https://github.com/JackPieCZ/EEPPR/tree/main/dataset) or `dataset/config.json` [file](https://github.com/JackPieCZ/EEPPR/blob/175736d322d484b46277459ba09a71a9fc23d58a/dataset/config.json#L2):
 ```console
 python ./method/main.py -f led
 ```
 
-3. Specifying RoI coordinates (optional, `--roi_coords`/`-rc`) in `X0 Y0 X1 Y1` format. RoI for sequences from the dataset are provided automatically. If you want to analyse the full sensor spatial resolution, use the `--full-resolution`/`-fr` flag. If none of those flags are provided, a GUI will be shown where the user can set RoI easily.
+3. Specifying RoI coordinates (optional, `--roi_coords`/`-rc`) in `X0 Y0 X1 Y1` format. RoI for sequences from the dataset are provided automatically. If you want to analyse the full sensor spatial resolution, use the `--full-resolution`/`-fr` flag. If none of those flags are provided, a GUI will be shown where the user can set RoI easily:
 ```console
 python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300
 ```
@@ -148,13 +148,13 @@ python ./method/main.py -f path/to/your/event_file.raw --read_t 500000 -srg
 ```
 
 
-5. By default, the method loads and analyses the first second of the given sequence data. To analyse the entire sequence at a step length equal to `--read_t` microseconds, use the `--full_seq_analysis`/`-fsa` flag. It is important to mention that in this use case, the `--read_t` parameter sets the update frequency in microseconds of the correlation template.
+5. By default, the method loads and analyses the first second of the given sequence data. To analyse the entire sequence at a step length equal to `--read_t` microseconds, use the `--full_seq_analysis`/`-fsa` flag. It is important to mention that in this use case, the `--read_t` parameter sets the update frequency in microseconds of the correlation template:
 ```console
-python ./method/main.py -f path/to/your/event_file.raw -rc 100 100 300 300 -srg
+python ./method/main.py -f path/to/your/event_file.raw -fsa --read_t 500000
 ```
 The method's output will be a 1D `numpy.ndarray` of `float64` measurements of a length equal to the number of steps (the sequence length divided by `--read_t`).
 
-6. Using a different aggregation function (`mean`, `median`, `max`, `min` or other NumPy functions) for aggregating measurements from all windows (optional, `--aggreg_fn`/`-afn`). By default, `median` is used.
+6. Using a different aggregation function (`mean`, `median`, `max`, `min` or other NumPy functions) for aggregating measurements from all windows (optional, `--aggreg_fn`/`-afn`). By default, `median` is used:
 ```console
 python ./method/main.py -f path/to/your/event_file.raw --aggreg_fn mean
 ```
@@ -195,7 +195,7 @@ python ./method/main.py -f path/to/your/event_file.raw --device cpu
 
 10. Logs are automatically saved into `--output_dir` (default: ./eeppr_out). If used with `--viz_corr_resp`, all plots of correlation responses are also saved here as `.jpg` files.
 
-11. To set the level of logs printed in the console (DEBUG, INFO, WARNING, ERROR, CRITICAL), use the `--log`/`-l` flag (default: INFO). If you prefer not to use the DEBUG logging level but want to get more information on why the analysis of events within some windows did not produce any measurements, use the `--verbose`/`-v` flag.
+11. To set the level of logs printed in the console (DEBUG, INFO, WARNING, ERROR, CRITICAL), use the `--log`/`-l` flag (default: INFO). If you prefer not to use the DEBUG logging level but want to get more information on why the analysis of events within some windows did not produce any measurements, use the `--verbose`/`-v` flag:
 ```console 
 python ./method/main.py -f handspinner -v
 ```
