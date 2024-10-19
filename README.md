@@ -1,10 +1,10 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2408.06899-b31b1b.svg)](https://arxiv.org/abs/2408.06899) [![DOI:10.48550/ARXIV.2408.06899](https://zenodo.org/badge/doi/10.48550/ARXIV.2408.06899.svg)](https://doi.org/10.48550/arXiv.2408.06899)
 
 # EEPPR: Event-based Estimation of Periodic Phenomena Rate using Correlation in 3D
-<!-- Kolář, J., Špetlík, R., Matas, J. (2024) EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation. In Proceedings of , 2024
- -->
+Kolář, J., Špetlík, R., Matas, J. (2024) EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation. In Proceedings of the 17th International Conference on Machine Vision, 2024
 
 Paper Link: [arXiv](https://arxiv.org/abs/2408.06899v1)
+Poster: [PDF](https://drive.google.com/file/d/1qIWbmFmbKt22JVjVxwC0HtW3V-tC9oYQ/view?usp=sharing)
 
 ## Dataset
 The dataset features 12 sequences of periodic phenomena (rotation - `01-06`, flicker - `07-08`, vibration - `09-10` and movement - `11-12`) with GT frequencies ranging from 3.2 up to 2000 Hz in `.raw` and `.hdf5` file formats.
