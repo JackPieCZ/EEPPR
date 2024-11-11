@@ -1,6 +1,7 @@
 import os
 import json
 import argparse
+from pathlib import Path
 import numpy as np
 from eeppr import EEPPR
 from datetime import datetime
@@ -31,7 +32,7 @@ def parse_arguments():
     parser.add_argument('--aggreg_fn', '-afn', type=str, default='median', choices=['mean', 'median', 'max', 'min'],
                         help='Name of a NumPy function used to aggregate measurements from all windows (default: median)')
     parser.add_argument('--decimals', '-dp', type=int, default=1,
-                        help='Number of decimal places to round the result to (default: 1)')
+                        help='Number of decimal places of the result to print/log (default: 1)')
     parser.add_argument('--skip_roi_gui', '-srg', action='store_true',
                         help='Flag to skip the RoI setup GUI if --roi_coords are provided')
     parser.add_argument('--win_size', '-w', type=int, default=45,
@@ -55,8 +56,6 @@ def parse_arguments():
     if args.read_t is None:
         if args.file in seq_names and not args.roi_coords:
             args.read_t = 1000000
-        if args.full_resolution:
-            args.read_t = 250000
         else:
             args.read_t = 500000
 
@@ -154,9 +153,14 @@ def main(args):
 
         # Convert lists to numpy arrays
         results = np.array(results)
-        freq_arrs = np.stack(freq_arrs)
+        freq_arrs = np.dstack(freq_arrs)
         corr_arrs = np.concatenate(corr_arrs, axis=2)
         if args.all_results:
+            if args.output_dir:
+                # Save the estimated frequency array and correlation responses
+                np.save(Path(args.output_dir).joinpath(
+                    'freq_arr.npy'), freq_arrs)
+                np.save(Path(args.output_dir).joinpath('corr_arr.npy'), corr_arrs)
             return results, freq_arrs, corr_arrs
         else:
             return results
@@ -169,6 +173,12 @@ def main(args):
         log_results(result, freq_arr)
 
         if args.all_results:
+            if args.output_dir:
+                # Save the estimated frequency array and correlation responses
+                np.save(Path(args.output_dir).joinpath(
+                    'freq_arr.npy'), freq_arr)
+                np.save(Path(args.output_dir).joinpath(
+                    'corr_arr.npy'), corr_arr)
             return result, freq_arr, corr_arr
         else:
             return result
@@ -199,4 +209,7 @@ if __name__ == "__main__":
     run_dir = os.path.join(
         args.output_dir, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
     os.makedirs(run_dir, exist_ok=True)
-    print(main(args))
+    results = main(args)
+    if args.log in ['DEBUG', 'INFO']:
+        print(results)
+    print("Done")

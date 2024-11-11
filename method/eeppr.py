@@ -46,25 +46,29 @@ class EEPPR:
         Returns:
             float: Estimated frequency in Hz.
         """
-        main_pbar = tqdm(total=5, desc='Running EEPPR method', leave=False,
-                         bar_format="{l_bar}|{bar}| {n_fmt}/{total_fmt}{postfix}")
-        # Load events from input file
-        main_pbar.set_description('Loading events...')
+        if self.log_level in ['DEBUG', 'INFO']:
+            main_pbar = tqdm(total=5, desc='Running EEPPR method', leave=False,
+                             bar_format="{l_bar}|{bar}| {n_fmt}/{total_fmt}{postfix}")
+            # Load events from input file
+            main_pbar.set_description('Loading events...')
         logger.debug(
             f'Loading events from input file: {self.input_file_path=}, {self.read_t=}, {self.roi_coords=}')
         sparse_ev_arr = load_events(
             self.input_file_path, self.reader, self.read_t, self.roi_coords)
         if sparse_ev_arr is None:
-            main_pbar.close()
+            if self.log_level in ['DEBUG', 'INFO']:
+                main_pbar.close()
             return None, None, None
-        main_pbar.update(1)
+        if self.log_level in ['DEBUG', 'INFO']:
+            main_pbar.update(1)
 
         # Quantize events and convert to torch tensor
-        main_pbar.set_description('Quantizing events...')
+            main_pbar.set_description('Quantizing events...')
         logger.debug(f'Quantizing events: {self.aggreg_t=}')
         quantized_events = torch.from_numpy(quantize_events(
             self.input_file_path, self.read_t, self.roi_coords, self.aggreg_t)[None])
-        main_pbar.update(1)
+        if self.log_level in ['DEBUG', 'INFO']:
+            main_pbar.update(1)
 
         # Calculate the number of windows in x and y directions
         roi_width = self.roi_coords['x1'] - self.roi_coords['x0']
@@ -73,7 +77,8 @@ class EEPPR:
         y_windows_num = (roi_height + 1) // self.win_size
 
         # Create an unfold function to partition the events into windows
-        main_pbar.set_description('Partitioning events...')
+        if self.log_level in ['DEBUG', 'INFO']:
+            main_pbar.set_description('Partitioning events...')
         logger.debug(
             f'Partitioning events into windows: {x_windows_num=}, {y_windows_num=}, {self.win_size=}')
 
@@ -81,29 +86,34 @@ class EEPPR:
             self.win_size, self.win_size), stride=self.win_size)
         del quantized_events
         partitioned_events = einops.rearrange(unfolded_events, '1 (b w h) (y x) -> b w h y x',
-                                              x=x_windows_num, y=y_windows_num, w=self.win_size, h=self.win_size).to(self.device)
+                                              x=x_windows_num, y=y_windows_num, w=self.win_size, h=self.win_size)\
+            .to(self.device)
         # Delete the original events tensor to free up memory
         del unfolded_events
-        main_pbar.update(1)
+        if self.log_level in ['DEBUG', 'INFO']:
+            main_pbar.update(1)
 
         # Perform 3D correlation on the event data
-        main_pbar.set_description(
-            'Computing 3D correlation...')
+            main_pbar.set_description(
+                'Computing 3D correlation...')
         logger.debug('Performing 3D correlation on the event data')
         estim_freq_arr, corr_out = self.correlate_3d(
             sparse_ev_arr, x_windows_num, y_windows_num, partitioned_events)
-        main_pbar.update(1)
+        if self.log_level in ['DEBUG', 'INFO']:
+            main_pbar.update(1)
 
         # Delete the sparse array and partitioned events tensor to free up memory
         del sparse_ev_arr, partitioned_events
 
         # Apply the aggregation function to aggregate the estimations from all windows
-        main_pbar.set_description('Aggregating results...')
+        if self.log_level in ['DEBUG', 'INFO']:
+            main_pbar.set_description('Aggregating results...')
         aggreg_fn = getattr(np, self.aggreg_fn.lower())
         result = np.round(
             aggreg_fn(estim_freq_arr[estim_freq_arr > 0]), self.precision)
-        main_pbar.update(1)
-        main_pbar.close()
+        if self.log_level in ['DEBUG', 'INFO']:
+            main_pbar.update(1)
+            main_pbar.close()
 
         return result, estim_freq_arr, corr_out
 
@@ -173,13 +183,17 @@ class EEPPR:
         logger.debug(f'Number of windows: {x_windows_num=}, {y_windows_num=}')
 
         # Iterate over each window in the grid
-        pbar = tqdm(np.ndindex(x_windows_num, y_windows_num),
-                    total=x_windows_num * y_windows_num, position=1, leave=False)
+        if self.log_level in ['DEBUG', 'INFO']:
+            pbar = tqdm(np.ndindex(x_windows_num, y_windows_num),
+                        total=x_windows_num * y_windows_num, position=1, leave=False)
+        else:
+            pbar = np.ndindex(x_windows_num, y_windows_num)
         for x_win, y_win in pbar:
             self.win_coords = (x_win, y_win)
             logger.debug(
                 f'Analysing events within window x={x_win}, y={y_win}')
-            pbar.set_description(f'Window x={x_win}, y={y_win}')
+            if self.log_level in ['DEBUG', 'INFO']:
+                pbar.set_description(f'Window x={x_win}, y={y_win}')
 
             # Calculate the start and end coordinates for the current window
             x_start = x_win * self.win_size + self.roi_coords['x0']
@@ -256,8 +270,8 @@ class EEPPR:
                 continue
 
             # Calculate the median rotations per second for the current window
-            freq_arr[y_win, x_win] = np.median(1e6 / periods)
-            logger.debug(f'Estimated frequency: {freq_arr[y_win, x_win]} Hz')
+            freq_arr[x_win, y_win] = np.median(1e6 / periods)
+            logger.debug(f'Estimated frequency: {freq_arr[x_win, y_win]} Hz')
 
         # Return the array of estimated rotations per second for each window
         return freq_arr, corr_arr

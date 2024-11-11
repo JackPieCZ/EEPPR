@@ -230,7 +230,6 @@ def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict
     Returns:
         sparse.COO: Sparse array of events.
     """
-    assert_and_log(os.path.exists(video_path), f"File {video_path} not found")
     if reset_reader:
         # Reset the reader to the beginning of the video
         raw_reader.reset()
