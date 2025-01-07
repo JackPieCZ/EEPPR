@@ -328,3 +328,50 @@ def find_template_depth(sparse_win_arr: sparse.COO, template_event_count: int, r
             # If the event count is greater than or equal to the desired count, move the right pointer to mid - 1
             right = mid - 1
     return left
+
+
+def unfold(self, input_tensor, kernel_size, stride=1, padding=0, dilation=1):
+    """
+    Re-implementation of the torch.nn.Unfold function as the original only supports torch.float16/32 input tensors.
+
+    Args:
+        input_tensor (torch.Tensor): Input tensor of shape (N, C, H, W).
+        kernel_size (int or tuple): Size of the sliding blocks.
+        stride (int or tuple, optional): Stride of the sliding blocks. Default: 1.
+        padding (int or tuple, optional): Zero-padding added to both sides of the input. Default: 0.
+        dilation (int or tuple, optional): Spacing between kernel elements. Default: 1.
+
+    Returns:
+        torch.Tensor: Unfolded tensor of shape (N, C * prod(kernel_size), L).
+    """
+    # Ensure kernel_size, stride, padding, and dilation are tuples
+    if isinstance(kernel_size, int):
+        kernel_size = (kernel_size, kernel_size)
+    if isinstance(stride, int):
+        stride = (stride, stride)
+    if isinstance(padding, int):
+        padding = (padding, padding)
+    if isinstance(dilation, int):
+        dilation = (dilation, dilation)
+
+    # Pad the input tensor
+    input_tensor = F.pad(input_tensor, (padding[1], padding[1], padding[0], padding[0]))
+
+    # Extract dimensions
+    N, C, H, W = input_tensor.shape
+    KH, KW = kernel_size
+    SH, SW = stride
+    DH, DW = dilation
+
+    # Calculate output dimensions
+    OH = (H - (DH * (KH - 1) + 1)) // SH + 1
+    OW = (W - (DW * (KW - 1) + 1)) // SW + 1
+
+    # Use unfold to extract sliding blocks
+    unfolded = input_tensor.unfold(2, KH, SH).unfold(3, KW, SW)
+
+    # Rearrange the dimensions to match the expected output
+    unfolded = unfolded.permute(0, 2, 3, 1, 4, 5).contiguous()
+    unfolded = unfolded.view(N, OH * OW, C * KH * KW).transpose(1, 2)
+
+    return unfolded

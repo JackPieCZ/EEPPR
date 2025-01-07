@@ -13,7 +13,7 @@ from torch.nn import functional as F
 from tqdm.auto import tqdm
 
 from logger import logger
-from utils import load_events, quantize_events, find_template_depth
+from utils import load_events, quantize_events, find_template_depth, unfold
 
 
 class EEPPR:
@@ -54,8 +54,7 @@ class EEPPR:
             main_pbar.set_description('Loading events...')
         logger.debug(f'Loading events from input file: {self.input_file_path=}, {self.read_t=}, {self.roi_coords=}')
         # Load events from input file
-        sparse_ev_arr = load_events(
-            self.input_file_path, self.reader, self.read_t, self.roi_coords)
+        sparse_ev_arr = load_events(self.input_file_path, self.reader, self.read_t, self.roi_coords)
         if sparse_ev_arr is None:
             # The sparse array is empty, end of sequence reached
             if self.log_level in ['DEBUG', 'INFO']:
@@ -83,8 +82,7 @@ class EEPPR:
             main_pbar.set_description('Partitioning events...')
         logger.debug(f'Partitioning events into windows: {x_windows_num=}, {y_windows_num=}, {self.win_size=}')
 
-        unfolded_events = self.unfold(quantized_events, kernel_size=(
-            self.win_size, self.win_size), stride=self.win_size)
+        unfolded_events = unfold(quantized_events, kernel_size=(self.win_size, self.win_size), stride=self.win_size)
         del quantized_events
         partitioned_events = einops.rearrange(unfolded_events, '1 (b w h) (y x) -> b w h y x',
                                               x=x_windows_num, y=y_windows_num, w=self.win_size, h=self.win_size) \
@@ -114,52 +112,6 @@ class EEPPR:
             main_pbar.close()
 
         return result, estim_freq_arr, corr_out
-
-    def unfold(self, input_tensor, kernel_size, stride=1, padding=0, dilation=1):
-        """
-        Re-implementation of the torch.nn.Unfold function as the original only supports torch.float16/32 input tensors.
-
-        Args:
-            input_tensor (torch.Tensor): Input tensor of shape (N, C, H, W).
-            kernel_size (int or tuple): Size of the sliding blocks.
-            stride (int or tuple, optional): Stride of the sliding blocks. Default: 1.
-            padding (int or tuple, optional): Zero-padding added to both sides of the input. Default: 0.
-            dilation (int or tuple, optional): Spacing between kernel elements. Default: 1.
-
-        Returns:
-            torch.Tensor: Unfolded tensor of shape (N, C * prod(kernel_size), L).
-        """
-        # Ensure kernel_size, stride, padding, and dilation are tuples
-        if isinstance(kernel_size, int):
-            kernel_size = (kernel_size, kernel_size)
-        if isinstance(stride, int):
-            stride = (stride, stride)
-        if isinstance(padding, int):
-            padding = (padding, padding)
-        if isinstance(dilation, int):
-            dilation = (dilation, dilation)
-
-        # Pad the input tensor
-        input_tensor = F.pad(input_tensor, (padding[1], padding[1], padding[0], padding[0]))
-
-        # Extract dimensions
-        N, C, H, W = input_tensor.shape
-        KH, KW = kernel_size
-        SH, SW = stride
-        DH, DW = dilation
-
-        # Calculate output dimensions
-        OH = (H - (DH * (KH - 1) + 1)) // SH + 1
-        OW = (W - (DW * (KW - 1) + 1)) // SW + 1
-
-        # Use unfold to extract sliding blocks
-        unfolded = input_tensor.unfold(2, KH, SH).unfold(3, KW, SW)
-
-        # Rearrange the dimensions to match the expected output
-        unfolded = unfolded.permute(0, 2, 3, 1, 4, 5).contiguous()
-        unfolded = unfolded.view(N, OH * OW, C * KH * KW).transpose(1, 2)
-
-        return unfolded
 
     def correlate_3d(self, sparse_ev_arr: sparse.COO, x_windows_num: int, y_windows_num: int,
                      partitioned_events: torch.Tensor):
