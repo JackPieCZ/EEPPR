@@ -1,28 +1,30 @@
-import os
-import json
 import argparse
-from pathlib import Path
-import numpy as np
-from eeppr import EEPPR
+import json
+import os
 from datetime import datetime
+from pathlib import Path
+
+import numpy as np
 from matplotlib import pyplot as plt, use
-from utils import setup_roi, list_to_dict
+from metavision_core.event_io import RawReader
+
+from eeppr import EEPPR
 from loader import get_sequence_path_roi
 from logger import setup_logger, logger, assert_and_log, raise_and_log
-from metavision_core.event_io import RawReader
+from utils import setup_roi, list_to_dict
 
 
 def parse_arguments():
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         description='Measure the frequency of periodic phenomena '
-        '(rotation, vibration, flicker, etc.) in an event-based sequence using the EEPPR method.')
+                    '(rotation, vibration, flicker, etc.) in an event-based sequence using the EEPPR method.')
     parser.add_argument('--file', '-f', required=True, type=str,
                         help=f'Filepath to the file to read events from (.raw) or name of a sequence from EEPPR dataset: {seq_names}')
     parser.add_argument('--roi_coords', '-rc', type=int, nargs=4, metavar=('X0', 'Y0', 'X1', 'Y1'),
                         help='RoI coordinates of the object to track (X0 Y0 X1 Y1)')
     parser.add_argument('--full_resolution', '-fr', action='store_true',
-                        help='Flag to set ROI to full resolution of the input file')
+                        help='Flag to analyse full spatial resolution of the input sequence')
     parser.add_argument('--aggreg_t', '-t', type=int, default=100,
                         help='Events aggregation interval in microseconds (default: 100)')
     parser.add_argument('--read_t', '-r', type=int,
@@ -45,7 +47,8 @@ def parse_arguments():
                         help='Output estimates from all windows (NumPy 2D array X x Y) and all correlation responses (NumPy 3D array X x Y x read_t/aggreg_t)')
     parser.add_argument('--device', '-d', type=str, default='cuda:0',
                         help='Device to run 3D correlation computations on (default: cuda:0)')
-    parser.add_argument('--log', '-l', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    parser.add_argument('--log', '-l', type=str, default='INFO',
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Logging level (default: INFO)')
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='Verbose mode')
@@ -85,18 +88,18 @@ def main(args):
     """
     setup_logger(run_dir, args.log)
     assert_and_log(0 < args.aggreg_t < args.read_t,
-                   "Aggregation interval must be greater than 0 and less than read_t, "
-                   "reccomended 100")
+                   "Aggregation interval must be greater than 0 and less than read_t, 100 is recommended")
     assert_and_log(args.aggreg_t < args.read_t,
-                   "Read time must be greater than aggreg_t, reccomended 1000000")
+                   "Read time must be greater than aggreg_t, 1000000 is recommended")
     assert_and_log(args.win_size > 0,
-                   "Window size must be greater than 0, reccomended 45")
+                   "Window size must be greater than 0, 45 is recommended")
     assert_and_log(args.event_count > 0,
-                   "Event count threshold must be greater than 0, reccomended 1800")
+                   "Event count threshold must be greater than 0, 1800 is recommended")
 
     logger.info(
         f"EEPPR method started with sequence '{args.file}', "
-        f"{f'Full sequence analysis with step length {args.read_t} us' if args.full_seq_analysis else f'Partial sequence analysis of length {args.read_t} us'}, "
+        f"{'Full sequence analysis with step length ' if args.full_seq_analysis else 'Partial sequence analysis of length '}"
+        f"{args.read_t} us, "
         f"Window size: {args.win_size}px, "
         f"Event count template threshold: {args.event_count}, "
         f"Aggregation interval: {args.aggreg_t} us, "
@@ -106,10 +109,8 @@ def main(args):
     if args.file in seq_names:
         args.file, args.roi_coords = get_sequence_path_roi(args.file)
     else:
-        assert_and_log(os.path.exists(args.file),
-                       f"File {args.file} not found")
-        assert_and_log(args.file.lower().endswith('.raw'),
-                       "File must be in .raw format")
+        assert_and_log(os.path.exists(args.file), f"File {args.file} not found")
+        assert_and_log(args.file.lower().endswith('.raw'), "File must be in .raw format")
 
     raw_reader = RawReader(args.file, max_events=int(4e7))
 
@@ -121,7 +122,7 @@ def main(args):
         args.roi_coords = {'x0': 0, 'y0': 0,
                            'x1': raw_reader.get_size()[0],
                            'y1': raw_reader.get_size()[1]}
-    if args.roi_coords is None and not args.skip_roi_gui:
+    if not args.roi_coords and not args.skip_roi_gui:
         args.roi_coords = setup_roi(raw_reader, args.roi_coords, args.win_size)
     logger.debug(f"Selected RoI: {args.roi_coords}")
 
@@ -156,11 +157,7 @@ def main(args):
         freq_arrs = np.dstack(freq_arrs)
         corr_arrs = np.concatenate(corr_arrs, axis=2)
         if args.all_results:
-            if args.output_dir:
-                # Save the estimated frequency array and correlation responses
-                np.save(Path(args.output_dir).joinpath(
-                    'freq_arr.npy'), freq_arrs)
-                np.save(Path(args.output_dir).joinpath('corr_arr.npy'), corr_arrs)
+            save_all_results(args, corr_arrs, freq_arrs)
             return results, freq_arrs, corr_arrs
         else:
             return results
@@ -173,15 +170,16 @@ def main(args):
         log_results(result, freq_arr)
 
         if args.all_results:
-            if args.output_dir:
-                # Save the estimated frequency array and correlation responses
-                np.save(Path(args.output_dir).joinpath(
-                    'freq_arr.npy'), freq_arr)
-                np.save(Path(args.output_dir).joinpath(
-                    'corr_arr.npy'), corr_arr)
+            save_all_results(args, corr_arr, freq_arr)
             return result, freq_arr, corr_arr
         else:
             return result
+
+
+def save_all_results(args, corr_arrs, freq_arrs):
+    # Save the estimated frequency array and correlation responses
+    np.save(Path(args.output_dir).joinpath('freq_arr.npy').as_posix(), freq_arrs)
+    np.save(Path(args.output_dir).joinpath('corr_arr.npy').as_posix(), corr_arrs)
 
 
 if __name__ == "__main__":
@@ -206,10 +204,9 @@ if __name__ == "__main__":
     seq_names = config_data['sequence_names']
 
     args = parse_arguments()
-    run_dir = os.path.join(
-        args.output_dir, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
+    run_dir = os.path.join(args.output_dir, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
     os.makedirs(run_dir, exist_ok=True)
-    results = main(args)
+    res = main(args)
     if args.log in ['DEBUG', 'INFO']:
-        print(results)
+        print(res)
     print("Done")

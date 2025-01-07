@@ -1,11 +1,11 @@
-import os
-import sparse
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import sparse
 from matplotlib.widgets import Button, Slider
 from metavision_core.event_io import EventsIterator
 from metavision_sdk_core import BaseFrameGenerationAlgorithm, RoiFilterAlgorithm
-from logger import assert_and_log, logger
+
+from logger import logger
 
 
 def generate_event_frame(events: np.ndarray, height: int, width: int) -> np.ndarray:
@@ -43,8 +43,7 @@ def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
     acc_events = raw_reader.load_n_events(5e5)
     image = generate_event_frame(acc_events, height, width)
 
-    fig, ax = plt.subplots(6, 1, figsize=(12, 9.5), gridspec_kw={
-                           'height_ratios': [5, .4, .1, .1, .1, .2]})
+    fig, ax = plt.subplots(6, 1, figsize=(12, 9.5), gridspec_kw={'height_ratios': [5, .4, .1, .1, .1, .2]})
     plt.get_current_fig_manager().window.wm_geometry("+0+0")
 
     def remove_windows(windows_patches):
@@ -66,7 +65,7 @@ def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
         else:
             for i in range(size // win_size):
                 for j in range(size // win_size):
-                    window_patch = plt.Rectangle((x + i*win_size, y + j*win_size),
+                    window_patch = plt.Rectangle((x + i * win_size, y + j * win_size),
                                                  win_size, win_size, facecolor='none', edgecolor='blue', linewidth=1)
                     ax_img.add_patch(window_patch)
                     windows_patches.append(window_patch)
@@ -75,7 +74,8 @@ def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
         """Update the ROI info text."""
         windows_count = (size.val // win_size) ** 2
         text.set_text(
-            f"{prefix} Currently {windows_count} windows for analysis. Estimated compute time: {0.3 * windows_count:.1f} - {1.1 * windows_count:.1f} sec.")
+            f"{prefix} Currently {windows_count} windows for analysis. "
+            f"Estimated compute time: {0.3 * windows_count:.1f} - {1.1 * windows_count:.1f} sec.")
 
     def update(_):
         """Update the position and size of the RoI."""
@@ -97,8 +97,7 @@ def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
             'y1': int(y.val) + int(size.val)
         })
         current_roi.remove()
-        current_roi = plt.Rectangle((x.val, y.val), size.val,
-                                    size.val, facecolor='none', edgecolor='orange')
+        current_roi = plt.Rectangle((x.val, y.val), size.val, size.val, facecolor='none', edgecolor='orange')
         ax_img.add_patch(current_roi)
         logger.info(f"Set new RoI {selected_roi[-1]}")
         update_roi_info('New RoI set.')
@@ -143,16 +142,14 @@ def setup_roi(raw_reader, roi: dict, win_size: int) -> dict:
     ax_buttons.axis('off')
 
     ax_img.imshow(image)
-    text = ax_text.text(0.5, 0.5, '', horizontalalignment='center',
-                        verticalalignment='center', fontsize=16)
+    text = ax_text.text(0.5, 0.5, '', horizontalalignment='center', verticalalignment='center', fontsize=16)
 
     # Create sliders
-    size = Slider(ax_size, 'Size', 45, 720,
-                  valinit=roi['x1'] - roi['x0'] if roi else 200, valstep=1)
-    x = Slider(ax_x, 'X0', 0, width, valinit=roi['x0'] if roi else width //
-               2 - size.val//2, valstep=1, color='green')
-    y = Slider(ax_y, 'Y0', 0, height, valinit=roi['y0'] if roi else height //
-               2 - size.val//2, valstep=1, color='green')
+    size = Slider(ax_size, 'Size', 45, 720, valinit=roi['x1'] - roi['x0'] if roi else 200, valstep=1)
+    x = Slider(ax_x, 'X0', 0, width, valinit=roi['x0'] if roi else width // 2 - size.val // 2, valstep=1,
+               color='green')
+    y = Slider(ax_y, 'Y0', 0, height, valinit=roi['y0'] if roi else height // 2 - size.val // 2, valstep=1,
+               color='green')
 
     # Create buttons
     ax_reset = fig.add_axes([0.29, 0.05, 0.1, 0.075])
@@ -218,7 +215,8 @@ def list_to_dict(coords: list) -> dict:
     return {'x0': x0, 'y0': y0, 'x1': x1, 'y1': y1}
 
 
-def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict: dict, reset_reader=False) -> sparse.COO:
+def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict: dict,
+                reset_reader=False) -> sparse.COO:
     """
     Load events from the video file within the specified ROI.
 
@@ -237,7 +235,7 @@ def load_events(video_path: str, raw_reader, microseconds_to_read: int, roi_dict
     events = raw_reader.load_delta_t(microseconds_to_read)
     if events.size == 0:
         logger.info(f"EOF reached or no events found in the video file {video_path}")
-        return None
+        return
     # Normalize event timestamps to start from zero
     events['t'] -= events['t'].min()
 
@@ -277,24 +275,22 @@ def quantize_events(video_path: str, microseconds_to_analyze: int, roi_dict: dic
     # Calculate the number of intervals based on the total time to analyze and the aggregation time
     num_intervals = int(microseconds_to_analyze / aggreg_t)
 
-    quantized_events = np.zeros(shape=(
-        num_intervals, end_y - start_y + 1, end_x - start_x + 1), dtype=np.int8)
+    quantized_events = np.zeros(shape=(num_intervals, end_y - start_y + 1, end_x - start_x + 1), dtype=np.int8)
 
-    ev_it = EventsIterator(video_path, delta_t=aggreg_t,
-                           max_duration=microseconds_to_analyze)
+    ev_it = EventsIterator(video_path, delta_t=aggreg_t, max_duration=microseconds_to_analyze)
 
     it = 0
     for ev in ev_it:
         if ev.size == 0 and it == 0:
-            # If the interval contains no events, skip to the next interval
+            # If the interval at the start of the sequence contains no events, skip to the next interval
             # This is due to the fact that RAW files always start with a few ms of no events
             continue
 
         # Create a mask to filter events within the ROI bounds
         in_bounds_mask = (ev['y'] >= start_y) & \
-            (ev['y'] < end_y) & \
-            (ev['x'] >= start_x) & \
-            (ev['x'] < end_x)
+                         (ev['y'] < end_y) & \
+                         (ev['x'] >= start_x) & \
+                         (ev['x'] < end_x)
 
         # Store events with relative coordinates and normalized polarity (0, 1) -> (-1, 1)
         quantized_events[it, ev['y'][in_bounds_mask] - start_y,
@@ -324,7 +320,7 @@ def find_template_depth(sparse_win_arr: sparse.COO, template_event_count: int, r
     while left < right:
         mid = (left + right) // 2
         # Count the number of non-zero elements in the sparse array
-        event_count = sparse_win_arr[:, :, :, :mid*aggreg_t].nnz
+        event_count = sparse_win_arr[:, :, :, :mid * aggreg_t].nnz
         if event_count < template_event_count:
             # If the event count is less than the desired count, move the left pointer to mid + 1
             left = mid + 1

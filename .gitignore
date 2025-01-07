@@ -167,3 +167,4 @@ cython_debug/
 /method/tests.py
 /method/main_all.py
 /eeppr_out
+/.idea

@@ -1,17 +1,19 @@
-import os
-import torch
-import sparse
-import einops
 import argparse
-import numpy as np
+import os
+
+import einops
 import matplotlib.pyplot as plt
-from tqdm.auto import tqdm
+import numpy as np
+import sparse
+import torch
 from matplotlib import ticker
-from torch.nn import functional as F
 from scipy.optimize import fminbound
 from scipy.signal import find_peaks
-from utils import load_events, quantize_events, find_template_depth
+from torch.nn import functional as F
+from tqdm.auto import tqdm
+
 from logger import logger
+from utils import load_events, quantize_events, find_template_depth
 
 
 class EEPPR:
@@ -41,7 +43,7 @@ class EEPPR:
 
     def run(self):
         """
-        Run the EEPPR method.
+        Runs the EEPPR method.
 
         Returns:
             float: Estimated frequency in Hz.
@@ -49,21 +51,21 @@ class EEPPR:
         if self.log_level in ['DEBUG', 'INFO']:
             main_pbar = tqdm(total=5, desc='Running EEPPR method', leave=False,
                              bar_format="{l_bar}|{bar}| {n_fmt}/{total_fmt}{postfix}")
-            # Load events from input file
             main_pbar.set_description('Loading events...')
-        logger.debug(
-            f'Loading events from input file: {self.input_file_path=}, {self.read_t=}, {self.roi_coords=}')
+        logger.debug(f'Loading events from input file: {self.input_file_path=}, {self.read_t=}, {self.roi_coords=}')
+        # Load events from input file
         sparse_ev_arr = load_events(
             self.input_file_path, self.reader, self.read_t, self.roi_coords)
         if sparse_ev_arr is None:
+            # The sparse array is empty, end of sequence reached
             if self.log_level in ['DEBUG', 'INFO']:
                 main_pbar.close()
             return None, None, None
+
         if self.log_level in ['DEBUG', 'INFO']:
             main_pbar.update(1)
-
-        # Quantize events and convert to torch tensor
             main_pbar.set_description('Quantizing events...')
+        # Quantize events and convert to torch tensor
         logger.debug(f'Quantizing events: {self.aggreg_t=}')
         quantized_events = torch.from_numpy(quantize_events(
             self.input_file_path, self.read_t, self.roi_coords, self.aggreg_t)[None])
@@ -79,26 +81,23 @@ class EEPPR:
         # Create an unfold function to partition the events into windows
         if self.log_level in ['DEBUG', 'INFO']:
             main_pbar.set_description('Partitioning events...')
-        logger.debug(
-            f'Partitioning events into windows: {x_windows_num=}, {y_windows_num=}, {self.win_size=}')
+        logger.debug(f'Partitioning events into windows: {x_windows_num=}, {y_windows_num=}, {self.win_size=}')
 
         unfolded_events = self.unfold(quantized_events, kernel_size=(
             self.win_size, self.win_size), stride=self.win_size)
         del quantized_events
         partitioned_events = einops.rearrange(unfolded_events, '1 (b w h) (y x) -> b w h y x',
-                                              x=x_windows_num, y=y_windows_num, w=self.win_size, h=self.win_size)\
+                                              x=x_windows_num, y=y_windows_num, w=self.win_size, h=self.win_size) \
             .to(self.device)
+
         # Delete the original events tensor to free up memory
         del unfolded_events
         if self.log_level in ['DEBUG', 'INFO']:
             main_pbar.update(1)
-
+            main_pbar.set_description('Computing 3D correlation...')
         # Perform 3D correlation on the event data
-            main_pbar.set_description(
-                'Computing 3D correlation...')
         logger.debug('Performing 3D correlation on the event data')
-        estim_freq_arr, corr_out = self.correlate_3d(
-            sparse_ev_arr, x_windows_num, y_windows_num, partitioned_events)
+        estim_freq_arr, corr_out = self.correlate_3d(sparse_ev_arr, x_windows_num, y_windows_num, partitioned_events)
         if self.log_level in ['DEBUG', 'INFO']:
             main_pbar.update(1)
 
@@ -109,8 +108,7 @@ class EEPPR:
         if self.log_level in ['DEBUG', 'INFO']:
             main_pbar.set_description('Aggregating results...')
         aggreg_fn = getattr(np, self.aggreg_fn.lower())
-        result = np.round(
-            aggreg_fn(estim_freq_arr[estim_freq_arr > 0]), self.precision)
+        result = np.round(aggreg_fn(estim_freq_arr[estim_freq_arr > 0]), self.precision)
         if self.log_level in ['DEBUG', 'INFO']:
             main_pbar.update(1)
             main_pbar.close()
@@ -142,8 +140,7 @@ class EEPPR:
             dilation = (dilation, dilation)
 
         # Pad the input tensor
-        input_tensor = F.pad(
-            input_tensor, (padding[1], padding[1], padding[0], padding[0]))
+        input_tensor = F.pad(input_tensor, (padding[1], padding[1], padding[0], padding[0]))
 
         # Extract dimensions
         N, C, H, W = input_tensor.shape
@@ -164,7 +161,8 @@ class EEPPR:
 
         return unfolded
 
-    def correlate_3d(self, sparse_ev_arr: sparse.COO, x_windows_num: int, y_windows_num: int, partitioned_events: torch.Tensor):
+    def correlate_3d(self, sparse_ev_arr: sparse.COO, x_windows_num: int, y_windows_num: int,
+                     partitioned_events: torch.Tensor):
         """
         Perform 3D correlation on the event data.
 
@@ -177,21 +175,19 @@ class EEPPR:
         Returns:
             np.ndarray: Array of estimated rotations per second for each window.
         """
-        corr_arr = np.full((x_windows_num, y_windows_num,
-                           self.read_t // self.aggreg_t), np.nan)
+        corr_arr = np.full((x_windows_num, y_windows_num, self.read_t // self.aggreg_t), np.nan)
         freq_arr = np.full((x_windows_num, y_windows_num), -1.0)
         logger.debug(f'Number of windows: {x_windows_num=}, {y_windows_num=}')
 
         # Iterate over each window in the grid
         if self.log_level in ['DEBUG', 'INFO']:
-            pbar = tqdm(np.ndindex(x_windows_num, y_windows_num),
-                        total=x_windows_num * y_windows_num, position=1, leave=False)
+            pbar = tqdm(np.ndindex(x_windows_num, y_windows_num), total=x_windows_num * y_windows_num, position=1,
+                        leave=False)
         else:
             pbar = np.ndindex(x_windows_num, y_windows_num)
         for x_win, y_win in pbar:
             self.win_coords = (x_win, y_win)
-            logger.debug(
-                f'Analysing events within window x={x_win}, y={y_win}')
+            logger.debug(f'Analysing events within window x={x_win}, y={y_win}')
             if self.log_level in ['DEBUG', 'INFO']:
                 pbar.set_description(f'Window x={x_win}, y={y_win}')
 
@@ -207,25 +203,23 @@ class EEPPR:
             # Skip if the number of non-zero elements is less than the template event count
             if sparse_win_arr.nnz < self.template_event_count:
                 logger.debug(
-                    f'Number of events ({sparse_win_arr.nnz}) in the window is less than the template event count ({self.template_event_count}). Skipping window {self.win_coords}.')
+                    f'Number of events ({sparse_win_arr.nnz}) in the window is less than the '
+                    f'template event count ({self.template_event_count}). Skipping window {self.win_coords}.')
                 if self.verbose:
                     tqdm.write(
-                        f'Number of events ({sparse_win_arr.nnz}) in the window is less than the template event count ({self.template_event_count}). Skipping window {self.win_coords}.')
+                        f'Number of events ({sparse_win_arr.nnz}) in the window is less than the '
+                        f'template event count ({self.template_event_count}). Skipping window {self.win_coords}.')
                 continue
 
             # Find the depth of the template
-            template_depth = find_template_depth(
-                sparse_win_arr, self.template_event_count, self.read_t, self.aggreg_t)
-            logger.debug(
-                f'Template depth: {template_depth}, max depth: {self.read_t // self.aggreg_t}')
+            template_depth = find_template_depth(sparse_win_arr, self.template_event_count, self.read_t, self.aggreg_t)
+            logger.debug(f'Template depth: {template_depth}, max depth: {self.read_t // self.aggreg_t}')
 
             # Skip if the template depth is too sparse
             if template_depth >= (self.read_t // self.aggreg_t) / 8:
-                logger.debug(
-                    f'Template events are too sparse. Skipping window {self.win_coords}.')
+                logger.debug(f'Template events are too sparse. Skipping window {self.win_coords}.')
                 if self.verbose:
-                    tqdm.write(
-                        f'Template events are too sparse. Skipping window {self.win_coords}.')
+                    tqdm.write(f'Template events are too sparse. Skipping window {self.win_coords}.')
                 continue
 
             # Extract the template and window tensors
@@ -233,16 +227,13 @@ class EEPPR:
             window = partitioned_events[:, :, :, y_win, x_win]
 
             # Perform 3D convolution
-            corr_out = F.conv3d(window[None][None].float(),
-                                template[None][None].float()).squeeze()
+            corr_out = F.conv3d(window[None][None].float(), template[None][None].float()).squeeze()
 
             # Skip if the second highest value in the correlation output is non-positive
             if torch.topk(corr_out, 2)[0][-1] <= 0:
-                logger.debug(
-                    f'No positive correlation responses found. Skipping window  {self.win_coords}.')
+                logger.debug(f'No positive correlation responses found. Skipping window  {self.win_coords}.')
                 if self.verbose:
-                    tqdm.write(
-                        f'No positive correlation responses found. Skipping window  {self.win_coords}.')
+                    tqdm.write(f'No positive correlation responses found. Skipping window  {self.win_coords}.')
                 continue
 
             # Convert the correlation output to a numpy array
@@ -253,20 +244,16 @@ class EEPPR:
             peaks = self.find_periodic_peaks(corr_out)
             period_timemarks = np.multiply(peaks, self.aggreg_t).flatten()
             if period_timemarks.size < 2:
-                logger.debug(
-                    f'Less than 2 peaks found. Skipping window  {self.win_coords}.')
+                logger.debug(f'Less than 2 peaks found. Skipping window  {self.win_coords}.')
                 if self.verbose:
-                    tqdm.write(
-                        f'Less than 2 peaks found. Skipping window  {self.win_coords}.')
+                    tqdm.write(f'Less than 2 peaks found. Skipping window  {self.win_coords}.')
             periods = np.diff(period_timemarks)
 
             # Skip if no periods are found
             if periods.size == 0:
-                logger.debug(
-                    f'No periods found. Skipping window  {self.win_coords}.')
+                logger.debug(f'No periods found. Skipping window  {self.win_coords}.')
                 if self.verbose:
-                    tqdm.write(
-                        f'No periods found. Skipping window  {self.win_coords}.')
+                    tqdm.write(f'No periods found. Skipping window  {self.win_coords}.')
                 continue
 
             # Calculate the median rotations per second for the current window
@@ -296,8 +283,7 @@ class EEPPR:
         if np.std(np.diff(peaks)) < 5:
             # If visualization is enabled, visualize the correlation responses
             if self.viz_corr_resp:
-                self.viz_corr_resps(peaks, properties,
-                                    corr_out, min_peak_height)
+                self.viz_corr_resps(peaks, properties, corr_out, min_peak_height)
             # Return the found peaks
             return peaks
         else:
@@ -320,12 +306,10 @@ class EEPPR:
                 disp=1)
 
             # Find peaks with the optimized minimum peak height and distance
-            peaks, properties = find_peaks(
-                corr_out, height=opt_min_peak_height, distance=opt_min_peak_dist)
+            peaks, properties = find_peaks(corr_out, height=opt_min_peak_height, distance=opt_min_peak_dist)
             # If visualization is enabled, visualize the correlation responses
             if self.viz_corr_resp:
-                self.viz_corr_resps(peaks, properties,
-                                    corr_out, opt_min_peak_height)
+                self.viz_corr_resps(peaks, properties, corr_out, opt_min_peak_height)
             # Return the found peaks
             return peaks
 
@@ -355,8 +339,8 @@ class EEPPR:
         plt.ylabel("Normalized correlation response", fontsize=fontsize)
         plt.xlabel("Time in milliseconds", fontsize=fontsize)
         plt.xlim(0, np.max(peaks))
-        plt.ylim(max(np.min(conv_out)-0.025, 0),
-                 np.partition(conv_out, -2)[-2]+0.025)
+        plt.ylim(max(np.min(conv_out) - 0.025, 0),
+                 np.partition(conv_out, -2)[-2] + 0.025)
         plt.xticks(fontsize=fontsize)
         plt.yticks(fontsize=fontsize)
 
@@ -364,15 +348,12 @@ class EEPPR:
         ax.xaxis.set_major_formatter(
             ticker.FuncFormatter(lambda x, _: '{:.0f}'.format(x / (1000 / self.aggreg_t))))
         ax.plot(conv_out, label='Correlation responses')
-        ax.plot(peaks, properties['peak_heights'],
-                "x", label='Peaks', markersize=fontsize)
-        plt.plot(np.full_like(conv_out, lower_bound), "--",
-                 color="gray", label='Lower bound of peaks')
+        ax.plot(peaks, properties['peak_heights'], "x", label='Peaks', markersize=fontsize)
+        plt.plot(np.full_like(conv_out, lower_bound), "--", color="gray", label='Lower bound of peaks')
         plt.legend(loc='lower right', fontsize=fontsize)
         plt.tight_layout()
         plt.grid()
 
         if self.viz_corr_resp:
-            plt.savefig(os.path.join(
-                self.run_dir, f'corr_resps_win-{self.win_coords[0]}-{self.win_coords[1]}.jpg'))
+            plt.savefig(os.path.join(self.run_dir, f'corr_resps_win-{self.win_coords[0]}-{self.win_coords[1]}.jpg'))
         plt.close('all')
