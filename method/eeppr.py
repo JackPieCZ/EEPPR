@@ -1,19 +1,16 @@
 import argparse
-import os
 
 import einops
-import matplotlib.pyplot as plt
 import numpy as np
 import sparse
 import torch
-from matplotlib import ticker
 from scipy.optimize import fminbound
 from scipy.signal import find_peaks
 from torch.nn import functional as F
 from tqdm.auto import tqdm
 
 from logger import logger
-from utils import load_events, quantize_events, find_template_depth
+from utils import load_events, quantize_events, find_template_depth, viz_corr_resps, unfold
 
 
 class EEPPR:
@@ -83,8 +80,7 @@ class EEPPR:
             main_pbar.set_description('Partitioning events...')
         logger.debug(f'Partitioning events into windows: {x_windows_num=}, {y_windows_num=}, {self.win_size=}')
 
-        unfolded_events = self.unfold(quantized_events, kernel_size=(
-            self.win_size, self.win_size), stride=self.win_size)
+        unfolded_events = unfold(quantized_events, kernel_size=(self.win_size, self.win_size), stride=self.win_size)
         del quantized_events
         partitioned_events = einops.rearrange(unfolded_events, '1 (b w h) (y x) -> b w h y x',
                                               x=x_windows_num, y=y_windows_num, w=self.win_size, h=self.win_size) \
@@ -114,52 +110,6 @@ class EEPPR:
             main_pbar.close()
 
         return result, estim_freq_arr, corr_out
-
-    def unfold(self, input_tensor, kernel_size, stride=1, padding=0, dilation=1):
-        """
-        Re-implementation of the torch.nn.Unfold function as the original only supports torch.float16/32 input tensors.
-
-        Args:
-            input_tensor (torch.Tensor): Input tensor of shape (N, C, H, W).
-            kernel_size (int or tuple): Size of the sliding blocks.
-            stride (int or tuple, optional): Stride of the sliding blocks. Default: 1.
-            padding (int or tuple, optional): Zero-padding added to both sides of the input. Default: 0.
-            dilation (int or tuple, optional): Spacing between kernel elements. Default: 1.
-
-        Returns:
-            torch.Tensor: Unfolded tensor of shape (N, C * prod(kernel_size), L).
-        """
-        # Ensure kernel_size, stride, padding, and dilation are tuples
-        if isinstance(kernel_size, int):
-            kernel_size = (kernel_size, kernel_size)
-        if isinstance(stride, int):
-            stride = (stride, stride)
-        if isinstance(padding, int):
-            padding = (padding, padding)
-        if isinstance(dilation, int):
-            dilation = (dilation, dilation)
-
-        # Pad the input tensor
-        input_tensor = F.pad(input_tensor, (padding[1], padding[1], padding[0], padding[0]))
-
-        # Extract dimensions
-        N, C, H, W = input_tensor.shape
-        KH, KW = kernel_size
-        SH, SW = stride
-        DH, DW = dilation
-
-        # Calculate output dimensions
-        OH = (H - (DH * (KH - 1) + 1)) // SH + 1
-        OW = (W - (DW * (KW - 1) + 1)) // SW + 1
-
-        # Use unfold to extract sliding blocks
-        unfolded = input_tensor.unfold(2, KH, SH).unfold(3, KW, SW)
-
-        # Rearrange the dimensions to match the expected output
-        unfolded = unfolded.permute(0, 2, 3, 1, 4, 5).contiguous()
-        unfolded = unfolded.view(N, OH * OW, C * KH * KW).transpose(1, 2)
-
-        return unfolded
 
     def correlate_3d(self, sparse_ev_arr: sparse.COO, x_windows_num: int, y_windows_num: int,
                      partitioned_events: torch.Tensor):
@@ -283,7 +233,7 @@ class EEPPR:
         if np.std(np.diff(peaks)) < 5:
             # If visualization is enabled, visualize the correlation responses
             if self.viz_corr_resp:
-                self.viz_corr_resps(peaks, properties, corr_out, min_peak_height)
+                viz_corr_resps(peaks, properties, corr_out, min_peak_height)
             # Return the found peaks
             return peaks
         else:
@@ -309,51 +259,6 @@ class EEPPR:
             peaks, properties = find_peaks(corr_out, height=opt_min_peak_height, distance=opt_min_peak_dist)
             # If visualization is enabled, visualize the correlation responses
             if self.viz_corr_resp:
-                self.viz_corr_resps(peaks, properties, corr_out, opt_min_peak_height)
+                viz_corr_resps(peaks, properties, corr_out, opt_min_peak_height)
             # Return the found peaks
             return peaks
-
-    def viz_corr_resps(self, peaks: np.ndarray, properties: dict, conv_out: np.ndarray, lower_bound: float) -> None:
-        """
-        Visualize the correlation responses.
-
-        Args:
-            peaks (np.ndarray): Array of peak indices.
-            properties (dict): Dictionary of peak properties.
-            conv_out (np.ndarray): Array of correlation responses.
-            lower_bound (float): Lower bound of peaks.
-
-        Returns:
-            None
-        """
-        fig, ax = plt.subplots(dpi=300, figsize=(8, 4.5))
-        fontsize = 14
-
-        # Normalize the correlation response
-        lower_bound /= np.max(conv_out)
-        properties['peak_heights'] /= np.max(conv_out)
-        conv_out /= np.max(conv_out)
-
-        plt.title('Correlation responses for window x={}, y={}'.format(
-            self.win_coords[0], self.win_coords[1]), fontsize=fontsize)
-        plt.ylabel("Normalized correlation response", fontsize=fontsize)
-        plt.xlabel("Time in milliseconds", fontsize=fontsize)
-        plt.xlim(0, np.max(peaks))
-        plt.ylim(max(np.min(conv_out) - 0.025, 0),
-                 np.partition(conv_out, -2)[-2] + 0.025)
-        plt.xticks(fontsize=fontsize)
-        plt.yticks(fontsize=fontsize)
-
-        # Format x-axis labels to display time in milliseconds
-        ax.xaxis.set_major_formatter(
-            ticker.FuncFormatter(lambda x, _: '{:.0f}'.format(x / (1000 / self.aggreg_t))))
-        ax.plot(conv_out, label='Correlation responses')
-        ax.plot(peaks, properties['peak_heights'], "x", label='Peaks', markersize=fontsize)
-        plt.plot(np.full_like(conv_out, lower_bound), "--", color="gray", label='Lower bound of peaks')
-        plt.legend(loc='lower right', fontsize=fontsize)
-        plt.tight_layout()
-        plt.grid()
-
-        if self.viz_corr_resp:
-            plt.savefig(os.path.join(self.run_dir, f'corr_resps_win-{self.win_coords[0]}-{self.win_coords[1]}.jpg'))
-        plt.close('all')
