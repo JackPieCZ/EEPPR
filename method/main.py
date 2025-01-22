@@ -1,4 +1,5 @@
 import argparse
+import copy
 import json
 import os
 from datetime import datetime
@@ -95,15 +96,13 @@ def main(args):
                    "Window size must be greater than 0, 45 is recommended")
     assert_and_log(args.event_count > 0,
                    "Event count threshold must be greater than 0, 1800 is recommended")
-
-    logger.info(
-        f"EEPPR method started with sequence '{args.file}', "
-        f"{'Full sequence analysis with step length ' if args.full_seq_analysis else 'Partial sequence analysis of length '}"
-        f"{args.read_t} us, "
-        f"Window size: {args.win_size}px, "
-        f"Event count template threshold: {args.event_count}, "
-        f"Aggregation interval: {args.aggreg_t} us, "
-        f"Aggregation function: {args.aggreg_fn}")
+    if args.file == 'all':
+        temp_args = copy.deepcopy(args)
+        print("Running EEPPR method for all sequences from the dataset")
+        input("Press Enter to continue...")
+        for seq_name in seq_names:
+            temp_args.file = seq_name
+            main(temp_args)
 
     # Check if file is from EEPPR dataset
     if args.file in seq_names:
@@ -125,6 +124,15 @@ def main(args):
     if not args.roi_coords and not args.skip_roi_gui:
         args.roi_coords = setup_roi(raw_reader, args.roi_coords, args.win_size)
     logger.debug(f"Selected RoI: {args.roi_coords}")
+
+    logger.info(
+        f"EEPPR method started with sequence '{args.file}', "
+        f"{'Full sequence analysis with step length ' if args.full_seq_analysis else 'Partial sequence analysis of length '}"
+        f"{args.read_t} us, "
+        f"Window size: {args.win_size}px, "
+        f"Event count template threshold: {args.event_count}, "
+        f"Aggregation interval: {args.aggreg_t} us, "
+        f"Aggregation function: {args.aggreg_fn}")
 
     # Initialize and run EEPPR
     eeppr = EEPPR(args, run_dir, raw_reader)
@@ -191,8 +199,8 @@ if __name__ == "__main__":
     # Load the dataset configuration data
     dataset_dir = os.path.join(os.path.dirname(
         os.path.dirname(__file__)), 'dataset')
+    config_filepath = os.path.join(dataset_dir, 'config.json')
     try:
-        config_filepath = os.path.join(dataset_dir, 'config.json')
         with open(config_filepath, 'r') as f:
             config_data = json.load(f)
             f.close()

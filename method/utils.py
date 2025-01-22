@@ -4,6 +4,7 @@ import sparse
 from matplotlib.widgets import Button, Slider
 from metavision_core.event_io import EventsIterator
 from metavision_sdk_core import BaseFrameGenerationAlgorithm, RoiFilterAlgorithm
+from torch.nn import functional as F
 
 from logger import logger
 
@@ -330,7 +331,7 @@ def find_template_depth(sparse_win_arr: sparse.COO, template_event_count: int, r
     return left
 
 
-def unfold(self, input_tensor, kernel_size, stride=1, padding=0, dilation=1):
+def unfold(input_tensor, kernel_size, stride=1, padding=0, dilation=1):
     """
     Re-implementation of the torch.nn.Unfold function as the original only supports torch.float16/32 input tensors.
 
