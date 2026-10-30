@@ -4,7 +4,7 @@
 Kolář, J., Špetlík, R., Matas, J. (2024) EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation. In Proceedings of the 17th International Conference on Machine Vision, 2024
 
 Paper Link: [SPIE](https://doi.org/10.1117/12.3055033)
-Poster: [PDF](https://drive.google.com/file/d/1qIWbmFmbKt22JVjVxwC0HtW3V-tC9oYQ/view?usp=sharing)
+Poster: [PDF](https://drive.google.com/file/d/1WR4zB_lzdvYnlfbgzS96URUzvHaShz8F/view?usp=sharing)
 
 ## Dataset
 The dataset features 12 sequences of periodic phenomena (rotation - `01-06`, flicker - `07-08`, vibration - `09-10` and movement - `11-12`) with GT frequencies ranging from 3.2 up to 2000 Hz in `.raw` and `.hdf5` file formats.
