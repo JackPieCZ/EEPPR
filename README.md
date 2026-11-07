@@ -3,7 +3,8 @@
 # EEPPR: Event-based Estimation of Periodic Phenomena Rate using Correlation in 3D
 Kolář, J., Špetlík, R., Matas, J. (2024) EEPPR: Event-based Estimation of Periodic Phenomena Frequency using 3D Correlation. In Proceedings of the 17th International Conference on Machine Vision, 2024
 
-Paper Link: [SPIE](https://doi.org/10.1117/12.3055033)
+Paper Link: [SPIE](https://doi.org/10.1117/12.3055033), [arXiv](https://arxiv.org/abs/2408.06899)
+
 Poster: [PDF](https://drive.google.com/file/d/1WR4zB_lzdvYnlfbgzS96URUzvHaShz8F/view?usp=sharing)
 
 ## Dataset
